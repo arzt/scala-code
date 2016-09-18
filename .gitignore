@@ -1,5 +1,10 @@
 /bin/
 /target/
 .idea/
+.classpath
+.cache-main
+.history
+.project
+org.scala-ide.sdt.core.prefs -.settings
 /project/
 scala.iml
