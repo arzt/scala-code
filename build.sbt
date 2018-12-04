@@ -2,8 +2,8 @@ name := "scala"
 
 version := "0.0"
 
-scalaVersion := "2.12.10"
+scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.0.7" % Test
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
