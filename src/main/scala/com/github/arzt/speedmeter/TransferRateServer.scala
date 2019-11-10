@@ -1,4 +1,4 @@
-package de.berlin.arzt.speedmeter
+package com.github.arzt.speedmeter
 
 import java.net.ServerSocket
 
