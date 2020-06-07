@@ -16,23 +16,6 @@ class AudioTest extends FreeSpec with Matchers {
   }
 
   "Audio test" - {
-    "random bytes" in {
-      val r = new Random()
-      val shorts = Array.fill[Short](100)(randomShort(r))
-
-      while (true) {
-        val s = {
-          1.toShort
-          randomShort(r)
-        }
-        val bytes = Audio.shortsToBytes(Iterator[Short](s)).toArray
-        val shorts = Audio.bytesToShorts(bytes.iterator).toArray
-        val res = shorts(0)
-        res shouldBe s
-      }
-      /*
-      * */
-    }
     "bytes to shorts" in {
       def res(a: Byte, b: Byte): Int = Audio.bytesToShorts(Array[Byte](b, a).iterator).toSeq.head
 
@@ -58,7 +41,7 @@ class AudioTest extends FreeSpec with Matchers {
       }
 
       res(0) shouldBe (0, 0)
-      res(1) shouldBe (0, 1)
+      res(1) shouldBe (1, 0)
     }
     "shorts to bytes 2" in {
       val r = new Random()
