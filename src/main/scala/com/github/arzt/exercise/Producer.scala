@@ -15,7 +15,6 @@ object Producer {
 
   val Random = new Random(12345L)
 
-
   def main(args: Array[String]): Unit = {
     val nUser = 1000
     val users =
@@ -32,13 +31,11 @@ object Producer {
       Try {
         writer.write(s)
         writer.flush()
-      }
-        .recoverWith{
-          case t =>
-            println(s)
-            Failure(t)
-        }
-        .get
+      }.recoverWith {
+        case t =>
+          println(s)
+          Failure(t)
+      }.get
     }
 
     val printer = qpsPrinter[String]
@@ -61,27 +58,26 @@ object Producer {
   def producerIterator(users: Seq[String]): Iterator[String] = {
     val nUser = users.length
     continually {
-        val iUser = Random.nextInt(nUser)
-        val user = users(iUser).toString
-        val string = randomString(Random, 10)
-        val stringBase64 = new String(Base64.getEncoder.encode(string.getBytes()))
-        val fpValue = Random.nextFloat().toString
-        val integerOne = Random.nextInt().abs
-        val integerTwo = Random.nextInt().abs
-        s"$user,$stringBase64,$fpValue,$integerOne,$integerTwo\n"
-      }
+      val iUser = Random.nextInt(nUser)
+      val user = users(iUser).toString
+      val string = randomString(Random, 10)
+      val stringBase64 = new String(Base64.getEncoder.encode(string.getBytes()))
+      val fpValue = Random.nextFloat().toString
+      val integerOne = Random.nextInt().abs
+      val integerTwo = Random.nextInt().abs
+      s"$user,$stringBase64,$fpValue,$integerOne,$integerTwo\n"
+    }
   }
 
   def qpsPrinter[T]: Iterator[T] => Iterator[T] = {
     var count = 0L
     val start = System.currentTimeMillis()
     x => {
-      x
-        .map { el =>
+      x.map { el =>
           count += 1
           if (count % 100000 == 0) {
             val diff = (System.currentTimeMillis() - start)
-            val seconds = (System.currentTimeMillis() - start)/1000.0
+            val seconds = (System.currentTimeMillis() - start) / 1000.0
             val qps = count / seconds
             println(s"qps: $qps count $count seconds $seconds")
           }

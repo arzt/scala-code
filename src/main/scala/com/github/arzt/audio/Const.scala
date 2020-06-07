@@ -36,12 +36,21 @@ object Const {
 
   val One: Double => Double = _ => 1
 
-  def osc(a: Double, b: Double, fr: Double): Double => Double = x => 0.5 * (b + a) * x - 0.5 * (b - a) * math.sin(fr * x + math.Pi / 2) / fr
+  def osc(a: Double, b: Double, fr: Double): Double => Double =
+    x => 0.5 * (b + a) * x - 0.5 * (b - a) * math.sin(fr * x + math.Pi / 2) / fr
 
-  def split(t0: Double, f1: Double => Double, f2: Double => Double): Double => Double =
+  def split(
+      t0: Double,
+      f1: Double => Double,
+      f2: Double => Double
+  ): Double => Double =
     t => if (t <= t0) f1(t) else f2(t)
 
-  def append(t0: Double, f1: Double => Double, f2: Double => Double): Double => Double =
+  def append(
+      t0: Double,
+      f1: Double => Double,
+      f2: Double => Double
+  ): Double => Double =
     t => if (t <= t0) f1(t) else f2(t - t0)
 
   def toMono(data: Array[Double], format: AudioFormat): Double => Double =
@@ -50,8 +59,10 @@ object Const {
       data.applyOrElse(idx, (x: Int) => 0.0)
     }
 
-  def toStereo(data: Array[Double],
-               format: AudioFormat): (Double => Double, Double => Double) = {
+  def toStereo(
+      data: Array[Double],
+      format: AudioFormat
+  ): (Double => Double, Double => Double) = {
     val rate = format.getSampleRate
     val left: Double => Double =
       x => {
@@ -66,11 +77,11 @@ object Const {
     (left, right)
   }
 
-  def stepFun(x: Array[Double], y: Array[Double]) : Double => Double =
+  def stepFun(x: Array[Double], y: Array[Double]): Double => Double =
     t => {
       val i = util.Arrays.binarySearch(x, t)
       val j = if (i >= 0) i else -(i + 2)
-      y.applyOrElse(j, (_ : Int) => 0)
+      y.applyOrElse(j, (_: Int) => 0)
     }
 
 }

@@ -56,7 +56,9 @@ object DataServer {
     println(s"done output handler ${Thread.currentThread().getId}")
   }
 
-  def handleInput(id: Int, socket: Socket)(implicit ec: ExecutionContext): Unit = {
+  def handleInput(id: Int, socket: Socket)(implicit
+      ec: ExecutionContext
+  ): Unit = {
     println(s"New input handler ${Thread.currentThread().getId}")
     val is = socket.getInputStream
     val reader = new BufferedReader(new InputStreamReader(is))
@@ -69,7 +71,9 @@ object DataServer {
 
   }
 
-  def getRandomUsersIds(n: Int): Seq[String] = Stream.continually(randomUUID()).map(_.toString).take(n).toArray.toSeq
+  def getRandomUsersIds(n: Int): Seq[String] =
+    Stream.continually(randomUUID()).map(_.toString).take(n).toArray.toSeq
 
-  def getRandomUsers(ids: Seq[String]): Seq[User] = Stream.continually(ids).map(User.getRandom)
+  def getRandomUsers(ids: Seq[String]): Seq[User] =
+    Stream.continually(ids).map(User.getRandom)
 }

@@ -16,7 +16,8 @@ object DataClient {
   def handleConnection2(socket: Socket): Unit = {
 
     val ps = new PrintStream(socket.getOutputStream)
-    Source.fromInputStream(socket.getInputStream)
+    Source
+      .fromInputStream(socket.getInputStream)
       .getLines()
       .map { line =>
         println(s"forward $line")

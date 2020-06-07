@@ -10,7 +10,8 @@ trait Dim extends Seq[Int] {
 
   def apply(i: Int): Int
 
-  override def iterator: Iterator[Int] = Iterator.range(0, length).map(x => apply(x))
+  override def iterator: Iterator[Int] =
+    Iterator.range(0, length).map(x => apply(x))
 }
 
 case class UnitDim(n: Int, sub: Seq[Int]) extends Dim {

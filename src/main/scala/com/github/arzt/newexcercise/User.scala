@@ -4,7 +4,13 @@ import java.util.Base64
 
 import scala.collection.Iterator.continually
 import scala.util.Random
-case class User(id: String, secret: String, price: Float, amount: Int, data: Int) {
+case class User(
+    id: String,
+    secret: String,
+    price: Float,
+    amount: Int,
+    data: Int
+) {
 
   override def toString: String = s"$id,$secret,$price,$amount,$data"
 }
@@ -12,7 +18,7 @@ case class User(id: String, secret: String, price: Float, amount: Int, data: Int
 object User {
 
   def fromString(s: String): User = {
-    val Seq(id,secret, priceStr, amountStr, dataStr, _*) = s.split(",").toSeq
+    val Seq(id, secret, priceStr, amountStr, dataStr, _*) = s.split(",").toSeq
     User(
       id,
       secret,

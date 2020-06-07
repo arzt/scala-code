@@ -16,7 +16,8 @@ object TransferRateClient {
         os.write(buf)
         (buf.length, System.currentTimeMillis())
       }
-    TransferRateServer.toBytesPerMs(a)
+    TransferRateServer
+      .toBytesPerMs(a)
       .map { x => s"${x * 1000} MB/s" }
       .foreach(println)
     println("Client stopped")

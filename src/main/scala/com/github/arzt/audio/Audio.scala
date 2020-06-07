@@ -12,7 +12,6 @@ import javax.sound.sampled.AudioSystem
 
 object Audio {
 
-
   def main(args: Array[String]): Unit = {
     val path = {
       "/home/sebastian/Desktop/audio/octave.wav"
@@ -41,33 +40,39 @@ object Audio {
     val head2 = doubles.take(1000000).toArray
     val shortOutput = doubleToShorts(head1.iterator)
     val byteOutput = shortsToBytes(shortOutput)
-    * */
+     * */
     playBackBytes(origBytes.iterator, format)
 
   }
 
-  def monoToSamples(wave: Double => Double, format: AudioFormat): Iterator[Double] = {
+  def monoToSamples(
+      wave: Double => Double,
+      format: AudioFormat
+  ): Iterator[Double] = {
     Iterator
       .iterate(0L)(_ + 1)
       .map(_.toDouble)
       .map(id / format.getSampleRate.toDouble andThen wave)
   }
 
-  def stereoToSamples(left: Double => Double,
-                      right: Double => Double,
-                      format: AudioFormat): Iterator[Double] = {
+  def stereoToSamples(
+      left: Double => Double,
+      right: Double => Double,
+      format: AudioFormat
+  ): Iterator[Double] = {
     val leftIt = monoToSamples(left, format)
     val rightIt = monoToSamples(right, format)
     Iterators.interleave(leftIt, rightIt)
   }
 
-
   def playBackMono(wave: Double => Double, format: AudioFormat): Unit =
     playBack(monoToSamples(wave, format), format)
 
-  def playBackStereo(left: Double => Double, right: Double => Double, format: AudioFormat): Unit = {
-
-  }
+  def playBackStereo(
+      left: Double => Double,
+      right: Double => Double,
+      format: AudioFormat
+  ): Unit = {}
 
   def readDoublesLittleEndian(in: AudioInputStream): Array[Double] = {
     //streamToBytes andThen bytesToShorts andThen shortsToDouble
@@ -82,7 +87,11 @@ object Audio {
     out
   }
 
-  def playBackBytes(output: Iterator[Byte], format: AudioFormat, size: Int = 1024): Unit = {
+  def playBackBytes(
+      output: Iterator[Byte],
+      format: AudioFormat,
+      size: Int = 1024
+  ): Unit = {
     val outBuf: Array[Byte] = new Array[Byte](size)
     val data = AudioSystem.getSourceDataLine(format)
     var pos = 0
@@ -105,12 +114,15 @@ object Audio {
     data.stop()
   }
 
-  def playBack(data: Iterator[Double], format: AudioFormat, size: Int = 1024): Unit = {
+  def playBack(
+      data: Iterator[Double],
+      format: AudioFormat,
+      size: Int = 1024
+  ): Unit = {
     val shortOutput = doubleToShorts(data)
     val byteOutput = shortsToBytes(shortOutput)
     playBackBytes(byteOutput, format, size)
   }
-
 
   val bytesToShorts: Iterator[Byte] => Iterator[Short] =
     in => {
@@ -133,9 +145,8 @@ object Audio {
       r
     })
 
-
-  val shortsToBytes: Iterator[Short] => Iterator[Byte] = {
-    x => {
+  val shortsToBytes: Iterator[Short] => Iterator[Byte] = { x =>
+    {
       new Iterator[Byte] {
         var s: Short = 0
         var dingDong = true

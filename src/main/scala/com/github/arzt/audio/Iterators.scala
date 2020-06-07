@@ -8,11 +8,11 @@ object Iterators {
       var first = false
 
       override def hasNext: Boolean =
-        if(first) i1.hasNext else i2.hasNext
+        if (first) i1.hasNext else i2.hasNext
 
       override def next(): T = {
         first = !first
-        if(first) {
+        if (first) {
           i1.next()
         } else {
           i2.next()

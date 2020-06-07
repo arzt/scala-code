@@ -1,23 +1,21 @@
 package com.github.arzt.audio.simulate
 
-
 object SoundSimulation {
 
   def nextWorld(t: Double): World => World =
     old => {
-      val newAtoms = old
-        .atoms
+      val newAtoms = old.atoms
         .map { atom =>
-          val forces = atom
-            .force
+          val forces = atom.force
             .map { i =>
               (atom, old.atoms(i))
             }
-            .map { case (thisAtom, otherAtom) =>
-              otherAtom.x - thisAtom.x
+            .map {
+              case (thisAtom, otherAtom) =>
+                otherAtom.x - thisAtom.x
             }
           val force = forces.sum * 0.005
-          val newSpeed = (atom.speed + force / atom.mass)*0.999
+          val newSpeed = (atom.speed + force / atom.mass) * 0.999
           val aCopy = atom.copy(
             speed = newSpeed,
             x = atom.x + newSpeed
@@ -44,13 +42,13 @@ object SoundSimulation {
         nextWorld(0.1)(old)
       }
 
-    time
-        .zipWithIndex
-      .foreach { case (x, i) => {
+    time.zipWithIndex
+      .foreach {
+        case (x, i) => {
 
-        val y = x.atoms(4).x
-        println(s"$i: $y")
-      }
+          val y = x.atoms(4).x
+          println(s"$i: $y")
+        }
       }
     println(world)
     println("test")

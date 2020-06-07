@@ -6,7 +6,6 @@ import scala.collection.Iterator.range
 
 object Sudoku {
 
-
   def index(width: Int): Int => Int => Int =
     x => {
       y => {
@@ -24,7 +23,7 @@ object Sudoku {
     println("tst")
   }
 
-  def incrementArray(max: Int): Array[Int]  => Array[Int] =
+  def incrementArray(max: Int): Array[Int] => Array[Int] =
     a => {
       incrementArray(max, a.length - 1, a)
     }
@@ -38,21 +37,21 @@ object Sudoku {
 
   @tailrec
   def increment(max: Int, i: Int, a: Seq[Int]): Seq[Int] =
-      if (a(i) < max) {
-        a.updated(i, a(i) + 1)
-      } else {
-        increment(max, i - 1, a.updated(i, 0))
-      }
+    if (a(i) < max) {
+      a.updated(i, a(i) + 1)
+    } else {
+      increment(max, i - 1, a.updated(i, 0))
+    }
 
   @tailrec
   def incrementArray(max: Int, i: Int, a: Array[Int]): Array[Int] =
-      if (a(i) < max) {
-        a(i) = a(i) + 1
-        a
-      } else {
-        a(i) =  0
-        incrementArray(max, i - 1, a)
-      }
+    if (a(i) < max) {
+      a(i) = a(i) + 1
+      a
+    } else {
+      a(i) = 0
+      incrementArray(max, i - 1, a)
+    }
 
   def hasNoDuplicate(values: Iterable[Int]): Boolean = {
     val init = (0, Set.empty[Int])
@@ -71,7 +70,13 @@ object Sudoku {
   def isValidSudoku(m: Int, n: Int, values: Seq[Int]): Boolean =
     isValidSudoku(m, n, values, m * n * m * n)
 
-  def isValidRow(m: Int, n: Int, values: Seq[Int], i: Int, rowi: Int): Boolean = {
+  def isValidRow(
+      m: Int,
+      n: Int,
+      values: Seq[Int],
+      i: Int,
+      rowi: Int
+  ): Boolean = {
     val start = (m * n) * rowi
     start
       .until(start + (m * n))
@@ -81,7 +86,13 @@ object Sudoku {
       .hasNoDuplicate
   }
 
-  def isValidCol(m: Int, n: Int, values: Seq[Int], i: Int, coli: Int): Boolean = {
+  def isValidCol(
+      m: Int,
+      n: Int,
+      values: Seq[Int],
+      i: Int,
+      coli: Int
+  ): Boolean = {
     coli
       .until(coli * (m * n))
       .by(m * n)
@@ -91,26 +102,31 @@ object Sudoku {
       .hasNoDuplicate
   }
 
-  def isValidBlock(m: Int, n: Int, values: Seq[Int], i: Int, blockI: Int, blockJ: Int): Boolean = {
+  def isValidBlock(
+      m: Int,
+      n: Int,
+      values: Seq[Int],
+      i: Int,
+      blockI: Int,
+      blockJ: Int
+  ): Boolean = {
     val rowTmp = 0.until(n)
     val yy = 0
       .until(m)
       .iterator
-      .flatMap{ j =>
+      .flatMap { j =>
         rowTmp
-          .map(_ + (m*n)*j)
+          .map(_ + (m * n) * j)
       }
       .toArray
       .toSeq
 
-    yy
-      .iterator
-      .hasNoDuplicate
+    yy.iterator.hasNoDuplicate
   }
 
   def hasValidRows(m: Int, n: Int, values: Seq[Int], i: Int): Boolean = {
-    range(0, m*n)
-      .map{ row =>
+    range(0, m * n)
+      .map { row =>
         isValidRow(m, n, values, i, row)
       }
       .forall(identity)
@@ -133,6 +149,5 @@ object Sudoku {
     hasValidCols(m, n, values, i) &&
     hasValidBlocks(m, n, values, i)
   }
-
 
 }

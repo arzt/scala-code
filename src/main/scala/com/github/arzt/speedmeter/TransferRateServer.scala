@@ -19,9 +19,8 @@ object TransferRateServer {
         stream.read(buf)
       }
       .takeWhile(_ > -1)
-      .map {
-        x =>
-          (x, System.currentTimeMillis())
+      .map { x =>
+        (x, System.currentTimeMillis())
       }
     toBytesPerMs(a)
       .map { x => s"${x * 1000} MB/s" }
@@ -29,17 +28,18 @@ object TransferRateServer {
     println("Server stopped")
   }
 
-  def toBytesPerMs(in: Iterator[(Int, Long)]) = in
-    .scanLeft(0, 0L) {
-      case ((sumBytes, _), (bytes, time)) if (time % 1000 < time) =>
-        (bytes, time % 1000)
-      case ((sumBytes, _), (bytes, time)) =>
-        (sumBytes + bytes, time % 1000)
-    }
-    .sliding(2, 1)
-    .collect {
-      case (bytes, milliseconds) :: (_, nextTime) :: Nil if milliseconds > nextTime =>
-        1d * bytes / milliseconds
-    }
+  def toBytesPerMs(in: Iterator[(Int, Long)]) =
+    in.scanLeft(0, 0L) {
+        case ((sumBytes, _), (bytes, time)) if (time % 1000 < time) =>
+          (bytes, time % 1000)
+        case ((sumBytes, _), (bytes, time)) =>
+          (sumBytes + bytes, time % 1000)
+      }
+      .sliding(2, 1)
+      .collect {
+        case (bytes, milliseconds) :: (_, nextTime) :: Nil
+            if milliseconds > nextTime =>
+          1d * bytes / milliseconds
+      }
 
 }

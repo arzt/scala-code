@@ -6,13 +6,11 @@ package object collection {
 
     def filterIndex(p: Long => Boolean): Iterator[T] = {
       var i = 0L
-      it.filter(
-        _ => {
-          val a = i
-          i += 1
-          p(a)
-        }
-      )
+      it.filter(_ => {
+        val a = i
+        i += 1
+        p(a)
+      })
     }
 
     def everyK(k: Int): Iterator[T] =
@@ -23,8 +21,7 @@ package object collection {
 
     def hasNoDuplicate: Boolean = {
       val init: (Boolean, Set[T]) = (true, Set())
-      it
-        .scanLeft(init) {
+      it.scanLeft(init) {
           case ((_, set), a) => {
             (!set.contains(a), set + a)
           }

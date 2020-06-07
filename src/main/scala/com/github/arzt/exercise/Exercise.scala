@@ -13,15 +13,14 @@ object Exercise {
     val s = new ServerSocket(9000, 1)
     ServerSocketChannel.open()
 
-   Iterator
-      .continually{
+    Iterator
+      .continually {
         s.getChannel
         Option(s.getChannel)
       }
       .flatten
-      .map {
-        channel =>
-          channel.accept()
+      .map { channel =>
+        channel.accept()
       }
       .foreach(println)
   }
