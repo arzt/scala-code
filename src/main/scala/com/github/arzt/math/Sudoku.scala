@@ -1,12 +1,12 @@
 package com.github.arzt.math
 
-import com.github.arzt.math.Sudoku2.{Constraint, ConstraintOps}
+import com.github.arzt.math.Sudoku.{Constraint, ConstraintOps}
 import com.github.arzt.scala.collection.IteratorExtension
 
 import scala.collection.IndexedSeq
 import scala.collection.Iterator.range
 
-class Sudoku2(w: Int, h: Int) {
+class Sudoku(w: Int, h: Int) {
 
   def satisfiesTemplate(s: String): Constraint =
     s.indices.map(i => hasValueAt(i, s(i) - '0')).reduce(_ && _)
@@ -134,7 +134,7 @@ class Sudoku2(w: Int, h: Int) {
 
 }
 
-object Sudoku2 {
+object Sudoku {
   type Constraint = IndexedSeq[Int] => Int => Boolean
 
   implicit class StringOpsSudoku(v: String) {
