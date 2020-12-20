@@ -1,15 +1,16 @@
 package com.github.arzt.math
 
-
-import com.github.arzt.math.Sudoku2.{Constraint, combine}
+import com.github.arzt.math.Sudoku2.{Constraint, ConstraintOps}
 import com.github.arzt.scala.collection.IteratorExtension
 
 import scala.annotation.tailrec
-import scala.collection.Iterator.range
 import scala.collection.IndexedSeq
-
+import scala.collection.Iterator.range
 
 class Sudoku2(w: Int, h: Int) {
+
+  def satisfiesTemplate(s: String): Constraint =
+    s.indices.map(i => hasValueAt(i, s(i) - '0')).reduce(_ && _)
 
   def valueCount: Int = w * h
 
@@ -18,7 +19,9 @@ class Sudoku2(w: Int, h: Int) {
   def values: Seq[Int] = 0.until(valueCount)
 
   def initArray(): Array[Int] = {
-    new Array[Int](cellCount + 1)
+    val a = new Array[Int](cellCount)
+    a(0) = 0
+    a
   }
 
   def initArray(vals: Int*): Array[Int] = {
@@ -26,6 +29,8 @@ class Sudoku2(w: Int, h: Int) {
     vals.copyToArray(array)
     array
   }
+
+  def initArray(vals: String): Array[Int] = initArray(vals.map(_ - '0'): _*)
 
   def setLast(x: Array[Int], value: Int): Array[Int] = {
     x(x.length - 1) = value
@@ -36,7 +41,7 @@ class Sudoku2(w: Int, h: Int) {
 
   @tailrec
   final def dropLast(x: Array[Int], value: Int): Array[Int] = {
-    if (x(x.last) == value) {
+    if (x(x.last - 1) == value) {
       x(x.length - 1) = x.last - 1
       dropLast(x, value)
     } else {
@@ -44,22 +49,18 @@ class Sudoku2(w: Int, h: Int) {
     }
   }
 
-  def nextBiggerCandidate(x: Array[Int], c: Constraint): Array[Int] = {
-    if (c(x)(x.last) && x.last < cellCount) {
-      setLast(x, x.last + 1)
-      x(x.last) = 1
-      x
-    } else if (x(x.last) < valueCount) {
-      x(x.last) = x(x.last) + 1
-      x
+  def nextCandidate(x: Array[Int], i: Int, c: Constraint): Int = {
+    if (c(x)(i) && i < cellCount) {
+      x(i) = 1
+      i + 1
     } else {
-      dropLast(x, valueCount)
-      x(x.last) = x(x.last) + 1
-      x
+      val j = x.lastIndexWhere(_ < valueCount, i - 1)
+      x(j) = x(j) + 1
+      j + 1
     }
   }
 
-  def nextSmallerCandidate(x: Array[Int], c: Constraint): Array[Int] = {
+  def previousCandidate(x: Array[Int], c: Constraint): Array[Int] = {
     if (c(x)(x.last) && x.last < cellCount) {
       setLast(x, x.last + 1)
       x(x.last) = 9
@@ -77,7 +78,7 @@ class Sudoku2(w: Int, h: Int) {
   def printSudoku(x: Seq[Int]): Unit = {
     for (i <- range(0, valueCount)) {
       for (j <- range(0, valueCount)) {
-        print(x(i*valueCount + j))
+        print(x(i * valueCount + j))
         print(" ")
         if (j % w == (w - 1)) print("  ")
       }
@@ -87,78 +88,90 @@ class Sudoku2(w: Int, h: Int) {
     }
   }
 
-  def applySafe(x: IndexedSeq[Int])(i: Int): Int = math.abs(x.applyOrElse(i, (y: Int) => 0))
+  def applySafe(x: IndexedSeq[Int])(i: Int): Int =
+    math.abs(x.applyOrElse(i, (y: Int) => 0))
+
+  def hasValidRowOld(i: Int): Constraint =
+    x =>
+      j => {
+        val start = i * valueCount
+        if (start > j) {
+          true
+        } else {
+          val end = math.min(start + valueCount, j)
+          val values = range(start, end).map(x.apply).toIndexedSeq
+          val isValid = values.iterator.hasNoDuplicate
+          isValid
+        }
+      }
 
   def hasValidRow(i: Int): Constraint =
-    x => j => {
-      val start = i * valueCount
-      if (start > j) {
-        true
-      } else {
+    x =>
+      j => {
+        val start = i * valueCount
         val end = math.min(start + valueCount, j)
         val values = range(start, end).map(x.apply).toIndexedSeq
         val isValid = values.iterator.hasNoDuplicate
         isValid
       }
-    }
-
-  def hasValidRows: Constraint = combine(values.map(hasValidRow): _*)
 
   def hasValidCol(i: Int): Constraint =
-    x => j => {
-      val start = i
-      if (start >= j) {
-        true
-      } else {
-        val unsaveEnd = start + (valueCount - 1) * valueCount + 1
-        val end = math.min(unsaveEnd, j)
-        val indices = Range(start, end, valueCount)
-        val values = indices.map(x.apply)
-        val result = values.iterator.hasNoDuplicate
-        result
+    x =>
+      j => {
+        val start = i
+        if (start >= j) {
+          true
+        } else {
+          val unsaveEnd = start + (valueCount - 1) * valueCount + 1
+          val end = math.min(unsaveEnd, j)
+          val indices = Range(start, end, valueCount)
+          val values = indices.map(x.apply)
+          val result = values.iterator.hasNoDuplicate
+          result
+        }
       }
-    }
-
-  def hasValidColumns: Constraint = combine(values.map(hasValidCol): _*)
 
   def hasValidBox(i: Int): Constraint =
-    x => j => {
-      val offset = i/h * h * valueCount + i%h * w
-      val unsafeIndexes = for {
-        a <- Range(0, h);
-        b <- Range(0, w)
-      } yield valueCount * a + b + offset
-      val indexes = unsafeIndexes.filter(_ < j)
-      val value = indexes.map(x.apply)
-      val result = value.iterator.hasNoDuplicate
-      result
-    }
+    x =>
+      j => {
+        val offset = i / h * h * valueCount + i % h * w
+        val unsafeIndexes = for {
+          a <- Range(0, h);
+          b <- Range(0, w)
+        } yield valueCount * a + b + offset
+        val indexes = unsafeIndexes.filter(_ < j)
+        val value = indexes.map(x.apply)
+        val result = value.iterator.hasNoDuplicate
+        result
+      }
 
-  def hasValidBoxes: Constraint = {
-    val boxes = 0.until(valueCount)
-    val res = combine(boxes.map(hasValidBox): _*)
-    res
-  }
+  def hasValidRows: Constraint = values.map(hasValidRow).reduce(_ && _)
 
-  def hasValue(i: Int, value: Int): Constraint =
-    x => j => {
-      val res = i >= j || x(i) == value
-      res
-    }
+  def hasValidColumns: Constraint = values.map(hasValidCol).reduce(_ && _)
 
-  def hasValue(x: Int, y: Int, value: Int): Constraint = hasValue(toIndex(x, y), value)
+  def hasValidBoxes: Constraint = values.map(hasValidBox).reduce(_ && _)
 
-  //def isValidSudoku: Constraint = combine(hasValidRows, hasValidBoxes, has)
+  def hasValueAt(i: Int, value: Int): Constraint =
+    x => j => i >= j || x(i) == value
+
+  def hasValue(x: Int, y: Int, value: Int): Constraint =
+    hasValueAt(toIndex(x, y), value)
+
+  def isValidSudoku: Constraint =
+    hasValidRows && hasValidBoxes && hasValidColumns
 
 }
 
 object Sudoku2 {
   type Constraint = IndexedSeq[Int] => Int => Boolean
 
-  implicit class ConstraintOps(c: Constraint) {
-    def &&(other: Constraint): Constraint = x => i => c(x)(i) && other(x)(i)
+  implicit class ConstraintOps(a: Constraint) {
+    def &&(b: Constraint): Constraint = x => i => a(x)(i) && b(x)(i)
   }
 
-  def combine(cs: Constraint*): Constraint = cs.reduce(_ && _)
+  /*
+  def && : (Constraint, Constraint) => Constraint =
+    (a, b) => x => i => a(x)(i) && b(x)(i)
+   */
 
 }
