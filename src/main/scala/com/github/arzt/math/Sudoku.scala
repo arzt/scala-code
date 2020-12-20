@@ -77,12 +77,17 @@ class Sudoku(w: Int, h: Int) {
   }
 
   def getBox(i: Int): collection.Seq[Int] = {
-    val offset = i / h * h * valueCount + i % h * w
-    val unsafeIndexes = for {
+    val row = toRow(i)/h*h
+    val col = toCol(i)/w*w
+    val offset = toIndex(col, row)
+    val box =
+      for {
       a <- Range(0, h);
       b <- Range(0, w)
-    } yield valueCount * a + b + offset
-    unsafeIndexes
+    } yield valueCount * a + b
+    val offsetko = box.map(_ + offset)
+    val filtered = offsetko.filter(_ < i)
+    filtered
   }
 
   def hasValidRow: ConstraintStr =
@@ -90,7 +95,7 @@ class Sudoku(w: Int, h: Int) {
       i => {
         val row = getRow(x.length)
         val sliced = row.view.map(x.apply)
-        val contains = sliced.contains(i(0))
+        val contains = sliced.contains(i)
         !contains
       }
 
@@ -99,7 +104,7 @@ class Sudoku(w: Int, h: Int) {
       i => {
         val col = getCol(x.length)
         val sliced = col.view.map(x.apply)
-        val contains = sliced.contains(i(0))
+        val contains = sliced.contains(i)
         !contains
       }
 
@@ -107,8 +112,8 @@ class Sudoku(w: Int, h: Int) {
     x =>
       i => {
         val box = getBox(x.length)
-        val sliced = box.view.map(x.apply)
-        val contains = sliced.contains(i(0))
+        val sliced = box.map(x.apply)
+        val contains = sliced.contains(i)
         !contains
       }
 
@@ -172,7 +177,7 @@ class Sudoku(w: Int, h: Int) {
 object Sudoku {
   type Constraint = IndexedSeq[Int] => Int => Boolean
 
-  type ConstraintStr = String => String => Boolean
+  type ConstraintStr = String => Char => Boolean
 
   implicit class StringOpsSudoku(v: String) {
     def toInts: Array[Int] = v.map(_ - '0').toArray
