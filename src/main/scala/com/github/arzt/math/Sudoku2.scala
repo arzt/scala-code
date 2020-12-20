@@ -18,11 +18,7 @@ class Sudoku2(w: Int, h: Int) {
 
   def values: Seq[Int] = 0.until(valueCount)
 
-  def initArray(): Array[Int] = {
-    val a = new Array[Int](cellCount)
-    a(0) = 0
-    a
-  }
+  def initArray(): Array[Int] = Array.fill[Int](cellCount)(1)
 
   def initArray(vals: Int*): Array[Int] = {
     val array = initArray()
@@ -39,43 +35,20 @@ class Sudoku2(w: Int, h: Int) {
 
   private def toIndex(x: Int, y: Int): Int = y * valueCount + x
 
-  @tailrec
-  final def dropLast(x: Array[Int], value: Int): Array[Int] = {
-    if (x(x.last - 1) == value) {
-      x(x.length - 1) = x.last - 1
-      dropLast(x, value)
-    } else {
-      x
-    }
-  }
-
   def nextCandidate(x: Array[Int], i: Int, c: Constraint): Int = {
     if (c(x)(i) && i < cellCount) {
       x(i) = 1
       i + 1
     } else {
       val j = x.lastIndexWhere(_ < valueCount, i - 1)
-      x(j) = x(j) + 1
+      if (j >= 0) {
+        x(j) = x(j) + 1
+      }
       j + 1
     }
   }
 
-  def previousCandidate(x: Array[Int], c: Constraint): Array[Int] = {
-    if (c(x)(x.last) && x.last < cellCount) {
-      setLast(x, x.last + 1)
-      x(x.last) = 9
-      x
-    } else if (x(x.last) > 1) {
-      x(x.last) = x(x.last) - 1
-      x
-    } else {
-      dropLast(x, 1)
-      x(x.last) = x(x.last) - 1
-      x
-    }
-  }
-
-  def printSudoku(x: Seq[Int]): Unit = {
+  def printSudoku(x: collection.Seq[Int]): Unit = {
     for (i <- range(0, valueCount)) {
       for (j <- range(0, valueCount)) {
         print(x(i * valueCount + j))
@@ -165,13 +138,12 @@ class Sudoku2(w: Int, h: Int) {
 object Sudoku2 {
   type Constraint = IndexedSeq[Int] => Int => Boolean
 
+  implicit class StringOpsSudoku(v: String) {
+    def toInts: Array[Int] = v.map(_ - '0').toArray
+  }
+
   implicit class ConstraintOps(a: Constraint) {
     def &&(b: Constraint): Constraint = x => i => a(x)(i) && b(x)(i)
   }
-
-  /*
-  def && : (Constraint, Constraint) => Constraint =
-    (a, b) => x => i => a(x)(i) && b(x)(i)
-   */
 
 }
