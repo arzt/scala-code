@@ -63,20 +63,6 @@ class Sudoku(w: Int, h: Int) {
   def applySafe(x: IndexedSeq[Int])(i: Int): Int =
     math.abs(x.applyOrElse(i, (y: Int) => 0))
 
-  def hasValidRowOld(i: Int): Constraint =
-    x =>
-      j => {
-        val start = i * valueCount
-        if (start > j) {
-          true
-        } else {
-          val end = math.min(start + valueCount, j)
-          val values = range(start, end).map(x.apply).toIndexedSeq
-          val isValid = values.iterator.hasNoDuplicate
-          isValid
-        }
-      }
-
   def hasValidRow(i: Int): Constraint =
     x =>
       j => {
