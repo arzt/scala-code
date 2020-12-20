@@ -1,6 +1,6 @@
 package com.github.arzt.math
 
-import com.github.arzt.math.Sudoku.{Constraint, ConstraintOps}
+import com.github.arzt.math.Sudoku.{Constraint, ConstraintOps, ConstraintStr}
 import com.github.arzt.scala.collection.IteratorExtension
 
 import scala.collection.IndexedSeq
@@ -34,6 +34,10 @@ class Sudoku(w: Int, h: Int) {
 
   private def toIndex(x: Int, y: Int): Int = y * valueCount + x
 
+  private def toCol(i: Int): Int = i % valueCount
+
+  private def toRow(i: Int): Int = i / valueCount
+
   def nextCandidate(x: Array[Int], i: Int, c: Constraint): Int = {
     if (c(x)(i) && i < cellCount) {
       x(i) = 1
@@ -59,6 +63,54 @@ class Sudoku(w: Int, h: Int) {
 
     }
   }
+
+  def getRow(i: Int): collection.Seq[Int] = {
+    val col = toCol(i)
+    val row = toRow(i)
+    val start = row * valueCount
+    start.until(start + col)
+  }
+
+  def getCol(i: Int): collection.Seq[Int] = {
+    val col = toCol(i)
+    col.until(i).by(valueCount)
+  }
+
+  def getBox(i: Int): collection.Seq[Int] = {
+    val offset = i / h * h * valueCount + i % h * w
+    val unsafeIndexes = for {
+      a <- Range(0, h);
+      b <- Range(0, w)
+    } yield valueCount * a + b + offset
+    unsafeIndexes
+  }
+
+  def hasValidRow: ConstraintStr =
+    x =>
+      i => {
+        val row = getRow(x.length)
+        val sliced = row.view.map(x.apply)
+        val contains = sliced.contains(i(0))
+        !contains
+      }
+
+  def hasValidCol: ConstraintStr =
+    x =>
+      i => {
+        val col = getCol(x.length)
+        val sliced = col.view.map(x.apply)
+        val contains = sliced.contains(i(0))
+        !contains
+      }
+
+  def hasValidBox: ConstraintStr =
+    x =>
+      i => {
+        val box = getBox(x.length)
+        val sliced = box.view.map(x.apply)
+        val contains = sliced.contains(i(0))
+        !contains
+      }
 
   def hasValidRow(i: Int): Constraint =
     x =>
@@ -119,6 +171,8 @@ class Sudoku(w: Int, h: Int) {
 
 object Sudoku {
   type Constraint = IndexedSeq[Int] => Int => Boolean
+
+  type ConstraintStr = String => String => Boolean
 
   implicit class StringOpsSudoku(v: String) {
     def toInts: Array[Int] = v.map(_ - '0').toArray
