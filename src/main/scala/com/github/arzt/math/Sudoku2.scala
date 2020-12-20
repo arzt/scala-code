@@ -3,7 +3,6 @@ package com.github.arzt.math
 import com.github.arzt.math.Sudoku2.{Constraint, ConstraintOps}
 import com.github.arzt.scala.collection.IteratorExtension
 
-import scala.annotation.tailrec
 import scala.collection.IndexedSeq
 import scala.collection.Iterator.range
 
