@@ -60,9 +60,6 @@ class Sudoku(w: Int, h: Int) {
     }
   }
 
-  def applySafe(x: IndexedSeq[Int])(i: Int): Int =
-    math.abs(x.applyOrElse(i, (y: Int) => 0))
-
   def hasValidRow(i: Int): Constraint =
     x =>
       j => {
