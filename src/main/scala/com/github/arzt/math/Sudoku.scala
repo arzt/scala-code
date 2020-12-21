@@ -1,11 +1,6 @@
 package com.github.arzt.math
 
-import com.github.arzt.math.Sudoku.{
-  Constraint,
-  ConstraintOps,
-  ConstraintStr,
-  ConstraintStrOps
-}
+import com.github.arzt.math.Sudoku.{Constraint, ConstraintOps, ConstraintStr}
 import com.github.arzt.scala.collection.IteratorExtension
 
 import scala.collection.IndexedSeq
@@ -52,19 +47,22 @@ class Sudoku(w: Int, h: Int) {
   }
 
   def nextCandidate(c: ConstraintStr, x: String): String = {
-      val biggest = (valueCount + '0').toChar
-      if (c(x) && x.length < cellCount) {
-        x + "1"
+    val biggest = (valueCount + '0').toChar
+    if (c(x) && x.length < cellCount) {
+      x + "1"
+    } else {
+      var j = x.length - 1
+      while (x.charAt(j) == biggest) {
+        j -= 1
+      }
+      if (j > -1) {
+        val ca = (x.charAt(j) + 1).toChar
+        x.substring(0, j) + ca
       } else {
-        val j = x.lastIndexWhere(_ < biggest)
-        if (j > -1) {
-          val ca = (x(j) + 1).toChar
-          x.substring(0, j) + ca
-        } else {
-          x
-        }
+        x
       }
     }
+  }
 
   def printSudoku(x: collection.Seq[Int]): Unit = {
     for (i <- range(0, valueCount)) {
@@ -98,35 +96,42 @@ class Sudoku(w: Int, h: Int) {
     offset
   }
 
-  def getBox(i: Int): Iterable[Int] = {
+  def getBox(i: Int): collection.Seq[Int] = {
     val offset = getOffset(i)
-    val filtered = box.view.map(_ + offset).filter(_ < i)
+    val filtered = box.map(_ + offset).filter(_ < i)
     filtered
   }
 
   def hasValidRow(x: String): Boolean = {
-    val col = toCol(x.length - 1)
-    val end = x.length - 1
+    val last = x.length - 1
+    val col = toCol(last)
+    val end = last
     val start = end - col
     var i = start
-    while (i < end && x.charAt(i) != x.last) {
+    while (i < end && x.charAt(i) != x.charAt(last)) {
       i = i + 1
     }
-    val contains = i < end && i < x.length && x(i) == x.last
-    !contains
+    i == end
   }
 
   def hasValidCol(x: String): Boolean = {
-    val col = getCol(x.length - 1)
-    val sliced = col.view.map(x.apply)
-    val contains = sliced.contains(x.last)
-    !contains
+    val last = x.length - 1
+    var i = last - valueCount
+    while (i > -1 && x.charAt(i) != x.charAt(last)) {
+      i -= valueCount
+    }
+    val valid = i < 0
+    valid
   }
 
   def hasValidBox(x: String): Boolean = {
-    val box = getBox(x.length - 1)
-    val sliced = box.map(x.apply)
-    val contains = sliced.exists(_ == x.last)
+    val offset = getOffset(x.length - 1)
+    var j = 0
+    while (j < box.length && x.charAt(box(j) + offset) != x.last) {
+      j += 1
+    }
+    val k = box(j) + offset
+    val contains = k < x.length - 1 && x.charAt(k) == x.last
     !contains
   }
 
@@ -160,7 +165,7 @@ class Sudoku(w: Int, h: Int) {
         }
       }
 
-  val box: collection.Seq[Int] = (for {
+  private val box: Array[Int] = (for {
     a <- Range(0, h);
     b <- Range(0, w)
   } yield valueCount * a + b).toArray
