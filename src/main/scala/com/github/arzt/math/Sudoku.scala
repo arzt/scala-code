@@ -32,11 +32,6 @@ class Sudoku(w: Int, h: Int) {
 
   def initArray(vals: String): Array[Int] = initArray(vals.map(_ - '0'): _*)
 
-  def setLast(x: Array[Int], value: Int): Array[Int] = {
-    x(x.length - 1) = value
-    x
-  }
-
   private def toIndex(x: Int, y: Int): Int = y * valueCount + x
 
   private def toCol(i: Int): Int = i % valueCount
