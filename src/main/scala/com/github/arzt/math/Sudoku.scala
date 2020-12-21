@@ -104,31 +104,35 @@ class Sudoku(w: Int, h: Int) {
     filtered
   }
 
-  def hasValidRow: ConstraintStr =
-    x => {
-      val row = getRow(x.length - 1)
-      val sliced = row.view.map(x.apply)
-      val contains = sliced.contains(x.last)
-      !contains
+  def hasValidRow(x: String): Boolean = {
+    val col = toCol(x.length - 1)
+    val end = x.length - 1
+    val start = end - col
+    var i = start
+    while (i < end && x.charAt(i) != x.last) {
+      i = i + 1
     }
+    val contains = i < end && i < x.length && x(i) == x.last
+    !contains
+  }
 
-  def hasValidCol: ConstraintStr =
-    x => {
-      val col = getCol(x.length - 1)
-      val sliced = col.view.map(x.apply)
-      val contains = sliced.contains(x.last)
-      !contains
-    }
+  def hasValidCol(x: String): Boolean = {
+    val col = getCol(x.length - 1)
+    val sliced = col.view.map(x.apply)
+    val contains = sliced.contains(x.last)
+    !contains
+  }
 
-  def hasValidBox: ConstraintStr =
-    x => {
-      val box = getBox(x.length - 1)
-      val sliced = box.map(x.apply)
-      val contains = sliced.exists(_ == x.last)
-      !contains
-    }
+  def hasValidBox(x: String): Boolean = {
+    val box = getBox(x.length - 1)
+    val sliced = box.map(x.apply)
+    val contains = sliced.exists(_ == x.last)
+    !contains
+  }
 
-  def isValid: ConstraintStr = hasValidBox && hasValidCol && hasValidRow
+  def isValid(x: String): Boolean = {
+    hasValidRow(x) && hasValidCol(x) && hasValidBox(x)
+  }
 
   def hasValidRow(i: Int): Constraint =
     x =>
