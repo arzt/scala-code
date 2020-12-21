@@ -63,9 +63,8 @@ class Sudoku(w: Int, h: Int) {
       } else {
         val j = x.lastIndexWhere(_ < biggest)
         if (j > -1) {
-          val ca: Char = (x(j) + 1).toChar
-          val hui = x.substring(0, j) + ca
-          hui
+          val ca = (x(j) + 1).toChar
+          x.substring(0, j) + ca
         } else {
           x
         }
@@ -97,17 +96,16 @@ class Sudoku(w: Int, h: Int) {
     col.until(i).by(valueCount)
   }
 
-  def getBox(i: Int): collection.Seq[Int] = {
+  def getOffset(i: Int): Int = {
     val row = toRow(i) / h * h
     val col = toCol(i) / w * w
     val offset = toIndex(col, row)
-    val box =
-      for {
-        a <- Range(0, h);
-        b <- Range(0, w)
-      } yield valueCount * a + b
-    val offsetko = box.map(_ + offset)
-    val filtered = offsetko.filter(_ < i)
+    offset
+  }
+
+  def getBox(i: Int): Iterable[Int] = {
+    val offset = getOffset(i)
+    val filtered = box.view.map(_ + offset).filter(_ < i)
     filtered
   }
 
@@ -131,7 +129,7 @@ class Sudoku(w: Int, h: Int) {
     x => {
       val box = getBox(x.length - 1)
       val sliced = box.map(x.apply)
-      val contains = sliced.contains(x.last)
+      val contains = sliced.exists(_ == x.last)
       !contains
     }
 
@@ -163,14 +161,16 @@ class Sudoku(w: Int, h: Int) {
         }
       }
 
+  val box: collection.Seq[Int] = (for {
+    a <- Range(0, h);
+    b <- Range(0, w)
+  } yield valueCount * a + b).toArray
+
   def hasValidBox(i: Int): Constraint =
     x =>
       j => {
         val offset = i / h * h * valueCount + i % h * w
-        val unsafeIndexes = for {
-          a <- Range(0, h);
-          b <- Range(0, w)
-        } yield valueCount * a + b + offset
+        val unsafeIndexes = box.view.map(_ + offset)
         val indexes = unsafeIndexes.filter(_ < j)
         val value = indexes.map(x.apply)
         val result = value.iterator.hasNoDuplicate
