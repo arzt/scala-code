@@ -13,11 +13,10 @@ object FindSudokus {
       i = s.nextCandidate(a, i, s.isValidSudoku)
       if (s.isValidSudoku(a)(s.cellCount)) {
         countSudoku += 1
-        println(countSudoku)
+        //println(countSudoku)
         if (countSudoku % 10000 == 0) {
           val ratio = 1.0*countSudoku/countAll
-          println(f"$ratio ($countSudoku/$countAll)")
-          println(ratio)
+          println(f"$ratio ($countSudoku/$countAll) rate: ${}")
           println(a.mkString(""))
         }
       }
