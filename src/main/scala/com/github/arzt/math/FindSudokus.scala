@@ -1,26 +1,31 @@
 package com.github.arzt.math
 
+import java.lang.System.currentTimeMillis
+
 object FindSudokus {
   def main(args: Array[String]): Unit = {
     println("test")
+    val start = currentTimeMillis()
     val s = new Sudoku(3, 3)
-    val a = s.initArray()
-    var i = 1
     var countAll = 0L
     var countSudoku = 0L
-    while (i > 0) {
+    var su = "123456789"
+    while (su.startsWith("123456789")) {
       //s.printSudoku(a)
-      i = s.nextCandidate(a, i, s.isValidSudoku)
-      if (s.isValidSudoku(a)(s.cellCount)) {
-        countSudoku += 1
-        //println(countSudoku)
-        if (countSudoku % 10000 == 0) {
-          val ratio = 1.0*countSudoku/countAll
-          println(f"$ratio ($countSudoku/$countAll) rate: ${}")
-          println(a.mkString(""))
-        }
+      while (su.length < s.cellCount || !s.isValid(su)) {
+        su = s.nextCandidate(s.isValid, su)
+        countAll += 1
       }
-      countAll += 1
+      countSudoku += 1
+      if (countSudoku % 10000 == 0) {
+        val diff = currentTimeMillis() - start
+        val ratio = 1.0 * countSudoku / countAll
+        println(f"$ratio ($countSudoku/$countAll) sudoku/ms: ${countSudoku*1.0/diff}")
+        println(ratio)
+        println(su)
+      }
+      su = s.nextCandidate(s.isValid, su)
     }
+    println(f"Sudokus: $countSudoku")
   }
 }
