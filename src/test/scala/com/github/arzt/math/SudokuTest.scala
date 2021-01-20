@@ -282,4 +282,122 @@ class SudokuTest extends AnyFreeSpec with Matchers {
     nextCandidate("122") mustBe "123"
     nextCandidate("123") mustBe "1231"
   }
+  "matches cell" should "respect cell constraint" in {
+    val s = new Sudoku(2, 2)
+    s.matchesCell("1", "____1") mustBe true
+    s.matchesCell("12", "+r2") mustBe true
+    s.matchesCell("123", "123") mustBe true
+    s.matchesCell("123", "13") mustBe true
+    s.matchesCell("123", "1 3") mustBe true
+    s.matchesCell("123", "122") mustBe false
+    s.matchesCell("122", "122455") mustBe true
+    s.matchesCell("1224", "122") mustBe true
+  }
+  "matches row" should "respect row constrains" in {
+    val s = new Sudoku(2, 2)
+    s.matchesRow("12341", "______2_____") mustBe true
+    s.matchesRow("12341", "______2") mustBe true
+    s.matchesRow("12341", "_______1") mustBe false
+    s.matchesRow("21", "__3_") mustBe true
+    s.matchesRow("1", "21") mustBe false
+    s.matchesRow("1", "2341") mustBe false
+    s.matchesRow("1", "__1_") mustBe false
+  }
+  "matches col" should "respect col constrains" in {
+    val s = new Sudoku(2, 2)
+    s.matchesCol("1", "____2") mustBe true
+    s.matchesCol("12", "_________2") mustBe false
+    s.matchesCol("1", "____1") mustBe false
+  }
+  "get box offset 2x2" should "convert absolute index to box offset" in {
+    val s = new Sudoku(2,2)
+    s.boxOffset(0) mustBe 0
+    s.boxOffset(4) mustBe 0
+    s.boxOffset(2) mustBe 2
+    s.boxOffset(13) mustBe 8
+    s.boxOffset(11) mustBe 10
+    s.boxOffset(15) mustBe 10
+  }
+  "get box offset 3x3" should "convert absolute index to box offset" in {
+    val s = new Sudoku(3,3)
+    s.boxOffset(0) mustBe 0
+    s.boxOffset(3) mustBe 3
+    s.boxOffset(6) mustBe 6
+    s.boxOffset(9) mustBe 0
+    s.boxOffset(12) mustBe 3
+    s.boxOffset(15) mustBe 6
+    s.boxOffset(18) mustBe 0
+    s.boxOffset(80) mustBe 6*9+2*3
+  }
+  "get internal box offset" should "compute internal box offset" in {
+    val s = new Sudoku(2, 2)
+    s.inverseWithinBoxOffset(0) mustBe 0
+    s.inverseWithinBoxOffset(1) mustBe 1
+    s.inverseWithinBoxOffset(2) mustBe 4
+    s.inverseWithinBoxOffset(3) mustBe 5
+  }
+  "get internal box offset 3x3" should "compute internal box offset" in {
+    val s = new Sudoku(3, 3)
+    s.inverseWithinBoxOffset(0) mustBe 0
+    s.inverseWithinBoxOffset(1) mustBe 1
+    s.inverseWithinBoxOffset(2) mustBe 2
+    s.inverseWithinBoxOffset(3) mustBe 3 + 6
+    s.inverseWithinBoxOffset(4) mustBe 4 + 6
+    s.inverseWithinBoxOffset(5) mustBe 5 + 6
+    s.inverseWithinBoxOffset(6) mustBe 6 + 6 + 6
+    s.inverseWithinBoxOffset(7) mustBe 7 + 6 + 6
+    s.inverseWithinBoxOffset(8) mustBe 8 + 6 + 6
+  }
+  "within box offset" should "work" in {
+    val s = new Sudoku(2, 2)
+    s.boxIndex(0) mustBe 0
+    s.boxIndex(1) mustBe 1
+    s.boxIndex(2) mustBe 0
+    s.boxIndex(3) mustBe 1
+    s.boxIndex(4) mustBe 2
+    s.boxIndex(5) mustBe 3
+    s.boxIndex(6) mustBe 2
+    s.boxIndex(7) mustBe 3
+  }
+  "exhaustive box conversion test" should "work" in {
+    val s = new Sudoku(3,3)
+    for (x <- 0 to s.cellCount) {
+      val result = s.inverseWithinBoxOffset(s.boxIndex(x)) + s.boxOffset(x)
+      result mustBe x
+    }
+  }
+  "matches box" should "respect box constrains" in {
+    val s = new Sudoku(2, 2)
+    s.matchesBox("21", "____1___________") mustBe false
+    s.matchesBox("1", "_____1") mustBe false
+    s.matchesBox("12343", "____________3______") mustBe true
+    s.matchesBox("12343", "_____4") mustBe true
+    s.matchesBox("12343", "_____3") mustBe false
+    s.matchesBox("21", "_____1__________") mustBe false
+    s.matchesBox("1", "_____2") mustBe true
+    s.matchesBox("21", "_____2") mustBe true
+    s.matchesBox("21", "_____1") mustBe false
+  }
+  ignore  should "yield matching sudoku" in {
+    val s = new Sudoku(3, 3)
+    val te =
+      "_3_______" +
+      "___195___" +
+      "__8____6_" +
+      "8___6____" +
+      "4__8____1" +
+      "____2____" +
+      "_6____28_" +
+      "___419__5" +
+      "_______7_"
+    val p = (x: String) => s.isValid(x) && s.matchesTemplate(x, te)
+    var su = "1"
+    while (true) {
+      while (su.length < 81) {
+        su = s.nextCandidate(p, su)
+      }
+      print(su)
+    }
+
+  }
 }

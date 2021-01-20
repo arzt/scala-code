@@ -2,19 +2,69 @@ package com.github.arzt.math
 
 import com.github.arzt.math.Sudoku.ConstraintStr
 
-import scala.collection.Iterator.range
-
 class Sudoku(w: Int, h: Int) {
+
+  val biggest = (valueCount + '0').toChar
+
+  def matchesCell(x: String, temp: String): Boolean = {
+    (x.length > temp.length) || {
+      val template = temp.charAt(x.length - 1)
+      template > biggest ||
+        template < '1' ||
+        template == x.charAt(x.length - 1)
+    }
+  }
+
+  def matchesRow(x: String, temp: String): Boolean = {
+    val value = x(x.length - 1)
+    var i = x.length
+
+    while (i % valueCount > 0 && i < temp.length && temp.charAt(i) != value)
+      i += 1
+
+    i == temp.length || i % valueCount == 0
+  }
+
+  def matchesCol(s: String, temp: String): Boolean = {
+    var i = s.length - 1
+    val value = s(i)
+    i = i + valueCount
+
+    while (i < temp.length && value != temp.charAt(i))
+      i += valueCount
+
+    i >= temp.length
+  }
+
+  def matchesBox(s: String, temp: String): Boolean = {
+    temp.length < s.length || {
+      val value = s.charAt(s.length - 1)
+      val offset = boxOffset(s.length - 1)
+      var iBox = boxIndex(s.length - 1) + 1
+      var i = offset + inverseWithinBoxOffset(iBox)
+      while (iBox < valueCount && i < temp.length && temp.charAt(i) != value) {
+        iBox += 1
+        i = offset + inverseWithinBoxOffset(iBox)
+      }
+      iBox == valueCount || i == temp.length || (i <= temp.length && temp.charAt(i) != value)
+    }
+  }
+
+  def matchesTemplate(x: String, temp: String): Boolean =
+    matchesCell(x, temp) &&
+      matchesRow(x, temp) &&
+      matchesCol(x, temp) &&
+      matchesBox(x, temp)
 
   def valueCount: Int = w * h
 
   def cellCount: Int = valueCount * valueCount
 
-  private def toIndex(x: Int, y: Int): Int = y * valueCount + x
+  def toIndex(x: Int, y: Int): Int = y * valueCount + x
 
-  private def toCol(i: Int): Int = i % valueCount
+  def toCol(i: Int): Int = i % valueCount
 
-  private def toRow(i: Int): Int = i / valueCount
+  def toRow(i: Int): Int = i / valueCount
 
   def nextCandidate(c: ConstraintStr, x: String): String = {
     val biggest = (valueCount + '0').toChar
@@ -34,17 +84,29 @@ class Sudoku(w: Int, h: Int) {
     }
   }
 
-  def getOffset(i: Int): Int = {
-    val row = toRow(i) / h * h
-    val col = toCol(i) / w * w
-    val offset = toIndex(col, row)
+  def boxOffset(i: Int): Int = {
+    val row = toRow(i)
+    val col = toCol(i)
+    val boxCol = col / w * w
+    val boxRow = row / h * h
+    val offset = toIndex(boxCol, boxRow)
     offset
   }
 
-  def getBox(i: Int): collection.Seq[Int] = {
-    val offset = getOffset(i)
-    val filtered = box.map(_ + offset).filter(_ < i)
-    filtered
+  def inverseWithinBoxOffset(i: Int): Int = {
+    val colBox = i % w
+    val rowBox = i / h
+    val index = toIndex(colBox, rowBox)
+    index
+  }
+
+  def boxIndex(i: Int): Int = {
+    val col = i % valueCount
+    val row = i / valueCount
+    val boxCol = col % w
+    val boxRow = row % h
+    val result = boxRow * h + boxCol
+    result
   }
 
   def hasValidRow(x: String): Boolean = {
@@ -70,7 +132,7 @@ class Sudoku(w: Int, h: Int) {
   }
 
   def hasValidBox(x: String): Boolean = {
-    val offset = getOffset(x.length - 1)
+    val offset = boxOffset(x.length - 1)
     var j = 0
     while (j < box.length && x.charAt(box(j) + offset) != x.last) {
       j += 1
