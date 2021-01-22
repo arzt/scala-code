@@ -331,22 +331,22 @@ class SudokuTest extends AnyFreeSpec with Matchers {
   }
   "get internal box offset" should "compute internal box offset" in {
     val s = new Sudoku(2, 2)
-    s.inverseWithinBoxOffset(0) mustBe 0
-    s.inverseWithinBoxOffset(1) mustBe 1
-    s.inverseWithinBoxOffset(2) mustBe 4
-    s.inverseWithinBoxOffset(3) mustBe 5
+    s.inverseBoxIndex(0) mustBe 0
+    s.inverseBoxIndex(1) mustBe 1
+    s.inverseBoxIndex(2) mustBe 4
+    s.inverseBoxIndex(3) mustBe 5
   }
   "get internal box offset 3x3" should "compute internal box offset" in {
     val s = new Sudoku(3, 3)
-    s.inverseWithinBoxOffset(0) mustBe 0
-    s.inverseWithinBoxOffset(1) mustBe 1
-    s.inverseWithinBoxOffset(2) mustBe 2
-    s.inverseWithinBoxOffset(3) mustBe 3 + 6
-    s.inverseWithinBoxOffset(4) mustBe 4 + 6
-    s.inverseWithinBoxOffset(5) mustBe 5 + 6
-    s.inverseWithinBoxOffset(6) mustBe 6 + 6 + 6
-    s.inverseWithinBoxOffset(7) mustBe 7 + 6 + 6
-    s.inverseWithinBoxOffset(8) mustBe 8 + 6 + 6
+    s.inverseBoxIndex(0) mustBe 0
+    s.inverseBoxIndex(1) mustBe 1
+    s.inverseBoxIndex(2) mustBe 2
+    s.inverseBoxIndex(3) mustBe 3 + 6
+    s.inverseBoxIndex(4) mustBe 4 + 6
+    s.inverseBoxIndex(5) mustBe 5 + 6
+    s.inverseBoxIndex(6) mustBe 6 + 6 + 6
+    s.inverseBoxIndex(7) mustBe 7 + 6 + 6
+    s.inverseBoxIndex(8) mustBe 8 + 6 + 6
   }
   "within box offset" should "work" in {
     val s = new Sudoku(2, 2)
@@ -362,7 +362,7 @@ class SudokuTest extends AnyFreeSpec with Matchers {
   "exhaustive box conversion test" should "work" in {
     val s = new Sudoku(3,3)
     for (x <- 0 to s.cellCount) {
-      val result = s.inverseWithinBoxOffset(s.boxIndex(x)) + s.boxOffset(x)
+      val result = s.inverseBoxIndex(s.boxIndex(x)) + s.boxOffset(x)
       result mustBe x
     }
   }
@@ -378,7 +378,7 @@ class SudokuTest extends AnyFreeSpec with Matchers {
     s.matchesBox("21", "_____2") mustBe true
     s.matchesBox("21", "_____1") mustBe false
   }
-  ignore  should "yield matching sudoku" in {
+  it should "yield matching sudoku" in {
     val s = new Sudoku(3, 3)
     val te =
       "_3_______" +

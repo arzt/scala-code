@@ -41,10 +41,10 @@ class Sudoku(w: Int, h: Int) {
       val value = s.charAt(s.length - 1)
       val offset = boxOffset(s.length - 1)
       var iBox = boxIndex(s.length - 1) + 1
-      var i = offset + inverseWithinBoxOffset(iBox)
+      var i = offset + inverseBoxIndex(iBox)
       while (iBox < valueCount && i < temp.length && temp.charAt(i) != value) {
         iBox += 1
-        i = offset + inverseWithinBoxOffset(iBox)
+        i = offset + inverseBoxIndex(iBox)
       }
       iBox == valueCount || i == temp.length || (i <= temp.length && temp.charAt(i) != value)
     }
@@ -93,7 +93,7 @@ class Sudoku(w: Int, h: Int) {
     offset
   }
 
-  def inverseWithinBoxOffset(i: Int): Int = {
+  def inverseBoxIndex(i: Int): Int = {
     val colBox = i % w
     val rowBox = i / h
     val index = toIndex(colBox, rowBox)
