@@ -3,29 +3,26 @@ package com.github.arzt.math
 import java.lang.System.currentTimeMillis
 
 object FindSudokus {
+
+  val diabolical01 =
+    "57_4__83_" +
+    "9_2___5__" +
+    "_____1___" +
+    "____82___" +
+    "2_______8" +
+    "___13____" +
+    "___6_____" +
+    "__7___6_4" +
+    "_14__5_92"
+
   def main(args: Array[String]): Unit = {
     println("test")
     val start = currentTimeMillis()
     val s = new Sudoku(3, 3)
-    var countAll = 0L
-    var countSudoku = 0L
-    var su = "123456789"
-    while (su.startsWith("123456789")) {
-      //s.printSudoku(a)
-      while (su.length < s.cellCount || !s.isValid(su)) {
-        su = s.nextCandidate(s.isValid, su)
-        countAll += 1
-      }
-      countSudoku += 1
-      if (countSudoku % 10000 == 0) {
-        val diff = currentTimeMillis() - start
-        val ratio = 1.0 * countSudoku / countAll
-        println(f"$ratio ($countSudoku/$countAll) sudoku/ms: ${countSudoku*1.0/diff}")
-        println(ratio)
-        println(su)
-      }
-      su = s.nextCandidate(s.isValid, su)
+    while (true) {
+      val result = s.solve(diabolical01).toVector
+      println(f"found ${result.length}")
     }
-    println(f"Sudokus: $countSudoku")
+
   }
 }

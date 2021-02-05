@@ -1,6 +1,6 @@
 package com.github.arzt.math
 
-import com.github.arzt.math.Sudoku.ConstraintStr
+import com.github.arzt.math.Sudoku.Constraint
 
 class Sudoku(w: Int, h: Int) {
 
@@ -27,8 +27,8 @@ class Sudoku(w: Int, h: Int) {
 
   def matchesCol(s: String, temp: String): Boolean = {
     var i = s.length - 1
-    val value = s(i)
-    i = i + valueCount
+    val value = s.charAt(i)
+    i += valueCount
 
     while (i < temp.length && value != temp.charAt(i))
       i += valueCount
@@ -38,13 +38,17 @@ class Sudoku(w: Int, h: Int) {
 
   def matchesBox(s: String, temp: String): Boolean = {
     temp.length < s.length || {
-      val value = s.charAt(s.length - 1)
-      val offset = boxOffset(s.length - 1)
-      var iBox = boxIndex(s.length - 1) + 1
-      var i = offset + inverseBoxIndex(iBox)
+      val last = s.length - 1
+      val value = s.charAt(last)
+      val offset = boxOffset(last)
+      var iBox = boxIndex(last)
+      iBox += 1
+      val i1 = inverseBoxIndex(iBox)
+      var i = offset + i1
       while (iBox < valueCount && i < temp.length && temp.charAt(i) != value) {
         iBox += 1
-        i = offset + inverseBoxIndex(iBox)
+        val i2 = inverseBoxIndex(iBox)
+        i = offset + i2
       }
       iBox == valueCount || i == temp.length || (i <= temp.length && temp.charAt(i) != value)
     }
@@ -66,22 +70,28 @@ class Sudoku(w: Int, h: Int) {
 
   def toRow(i: Int): Int = i / valueCount
 
-  def nextCandidate(c: ConstraintStr, x: String): String = {
+  def nextCandidate(c: Constraint, x: String): String = {
     val biggest = (valueCount + '0').toChar
     if (c(x) && x.length < cellCount) {
       x + "1"
     } else {
       var j = x.length - 1
-      while (x.charAt(j) == biggest) {
+      while (j > 0 && x.charAt(j) == biggest) {
         j -= 1
       }
-      if (j > -1) {
-        val ca = (x.charAt(j) + 1).toChar
+      val charJ = x.charAt(j)
+      if (j > -1 && charJ < biggest) {
+        val ca = (charJ + 1).toChar
         x.substring(0, j) + ca
       } else {
-        x
+        ""
       }
     }
+  }
+
+  def nextCandidateCurr(c: Constraint): String => String =
+  x => {
+    nextCandidate(c, x)
   }
 
   def boxOffset(i: Int): Int = {
@@ -95,7 +105,7 @@ class Sudoku(w: Int, h: Int) {
 
   def inverseBoxIndex(i: Int): Int = {
     val colBox = i % w
-    val rowBox = i / h
+    val rowBox = i / w
     val index = toIndex(colBox, rowBox)
     index
   }
@@ -105,7 +115,7 @@ class Sudoku(w: Int, h: Int) {
     val row = i / valueCount
     val boxCol = col % w
     val boxRow = row % h
-    val result = boxRow * h + boxCol
+    val result = boxRow * w + boxCol
     result
   }
 
@@ -134,33 +144,49 @@ class Sudoku(w: Int, h: Int) {
   def hasValidBox(x: String): Boolean = {
     val offset = boxOffset(x.length - 1)
     var j = 0
-    while (j < box.length && x.charAt(box(j) + offset) != x.last) {
+    val lastChar = x.charAt(x.length - 1)
+    while (j < box.length && x.charAt(box(j) + offset) != lastChar) {
       j += 1
     }
     val k = box(j) + offset
-    val contains = k < x.length - 1 && x.charAt(k) == x.last
+    val contains = k < x.length - 1 && x.charAt(k) == lastChar
     !contains
   }
 
   def isValid(x: String): Boolean = hasValidRow(x) && hasValidCol(x) && hasValidBox(x)
+
+  def isValidTemplate(template: String)(x: String): Boolean = isValid(x) && matchesTemplate(x, template)
+
+  def iterateCandidates(sudoku: String): Iterator[String] = {
+    val start = "1"
+    Iterator
+      .iterate(start)(nextCandidateCurr(isValidTemplate(sudoku)(_)))
+      .takeWhile(_.nonEmpty)
+  }
+
+  def solve(sudoku: String): Iterator[String] = iterateCandidates(sudoku).filter(_.length == cellCount).filter(isValid)
 
   private val box: Array[Int] = (for {
     a <- Range(0, h);
     b <- Range(0, w)
   } yield valueCount * a + b).toArray
 
+
+  def print(x: String): Unit = {
+    x.toSeq.sliding(valueCount, valueCount).map(_.unwrap).foreach(println)
+  }
 }
 
 object Sudoku {
 
-  type ConstraintStr = String => Boolean
+  type Constraint = String => Boolean
 
   implicit class StringOpsSudoku(v: String) {
     def toInts: Array[Int] = v.map(_ - '0').toArray
   }
 
-  implicit class ConstraintStrOps(a: ConstraintStr) {
-    def &&(b: ConstraintStr): ConstraintStr = x => a(x) && b(x)
+  implicit class ConstraintStrOps(a: Constraint) {
+    def &&(b: Constraint): Constraint = x => a(x) && b(x)
   }
 
 }
