@@ -387,25 +387,6 @@ class SudokuTest extends AnyFreeSpec with Matchers {
     s.matchesBox("21", "_____2") mustBe true
     s.matchesBox("21", "_____1") mustBe false
   }
-  ignore should "solve sudoku 3x3" in {
-    val te =
-      "_3_______" +
-        "___195___" +
-        "__8____6_" +
-        "8___6____" +
-        "4__8____1" +
-        "____2____" +
-        "_6____28_" +
-        "___419__5" +
-        "_______7_"
-    val s = new Sudoku(3, 3)
-    val result = s.solve(te).map{
-      x =>
-        s.print(x)
-        x
-    }.toVector
-    result.nonEmpty mustBe true
-  }
   it should "yield matching sudoku 2" in {
     val s = new Sudoku(3, 3)
     val te =
@@ -474,5 +455,37 @@ class SudokuTest extends AnyFreeSpec with Matchers {
         "  4   "
     val result = s.solve(te).toVector
     result.nonEmpty mustBe true
+  }
+  it should "a string of random numbers" in {
+    val s = new Sudoku(2, 2)
+    val result = s.randomNumbers()
+    result.length mustBe s.valueCount
+    result.contains("1") mustBe true
+    result.contains("2") mustBe true
+    result.contains("3") mustBe true
+    result.contains("4") mustBe true
+  }
+  it should "compute a random template" in {
+    val s = new Sudoku(3, 3)
+    val result: String = s.randomTemplate()
+    s.toString(s.randomFilledSudoku())
+    s.toString(s.randomFilledSudoku())
+    s.toString(s.randomFilledSudoku())
+    s.toString(s.randomFilledSudoku())
+    result.length mustBe s.cellCount
+  }
+  it should "transpose a sudoku matrix" in {
+    val s = new Sudoku(2, 2)
+    val x =
+        "1234" +
+        "3412" +
+        "2143" +
+        "4321"
+    val expected =
+        "1324" +
+        "2413" +
+        "3142" +
+        "4231"
+    s.transpose(x) mustBe expected
   }
 }

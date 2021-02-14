@@ -2,7 +2,29 @@ package com.github.arzt.math
 
 import com.github.arzt.math.Sudoku.Constraint
 
+import scala.collection.immutable.WrappedString
+import scala.util.Random
+
 class Sudoku(w: Int, h: Int) {
+
+  def randomTemplate(): String = {
+    val output = Array.fill(cellCount)('_')
+    for (j <- 0 until (math.min(w, h))) {
+      val rn = randomNumbers()
+      val boxOffset = toIndex(w*j, h*j)
+      for (i <- 0 until 9) {
+        val ii = inverseBoxIndex(i)
+        output(boxOffset + ii) = rn(i)
+      }
+    }
+    output.mkString
+  }
+
+  def randomFilledSudoku(n: Int = 1): String = {
+    val str = randomTemplate()
+
+    solveList(str)(Random.nextInt(n))
+  }
 
   val biggest = (valueCount + '0').toChar
 
@@ -166,14 +188,32 @@ class Sudoku(w: Int, h: Int) {
 
   def solve(sudoku: String): Iterator[String] = iterateCandidates(sudoku).filter(_.length == cellCount).filter(isValid)
 
+  def solveList(sudoku: String): LazyList[String] = solve(sudoku).to(LazyList)
+
   private val box: Array[Int] = (for {
     a <- Range(0, h);
     b <- Range(0, w)
   } yield valueCount * a + b).toArray
 
+  def rowToString(row: WrappedString): String = row.sliding(w, w).mkString("", " ", "\n")
 
-  def print(x: String): Unit = {
-    x.toSeq.sliding(valueCount, valueCount).map(_.unwrap).foreach(println)
+  def rowsToString(rows: WrappedString): String = rows.sliding(valueCount, valueCount).map(rowToString).mkString("")
+
+  def toString(x: String) = x.toIterable.sliding(valueCount*h, valueCount*h).map(rowsToString).mkString("", "\n", "\n")
+
+  def randomNumbers(): String = {
+    ('1' to biggest).mkString("")
+    val a = Random.shuffle(('1' to biggest).toVector).mkString
+    a
+  }
+
+  def transpose(x: String): String = {
+    (for (i <- 0 until cellCount) yield {
+      val col = toCol(i)
+      val row = toRow(i)
+      val o = toIndex(row, col)
+      x.charAt(o)
+    }).mkString
   }
 }
 
