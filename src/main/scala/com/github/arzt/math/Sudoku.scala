@@ -215,6 +215,15 @@ class Sudoku(w: Int, h: Int) {
       x.charAt(o)
     }).mkString
   }
+
+  def flipVertical(x: String): String = {
+    (for (i <- 0 until cellCount) yield {
+      val col = toCol(i)
+      val row = valueCount - toRow(i) - 1
+      val o = toIndex(col, row)
+      x.charAt(o)
+    }).mkString
+  }
 }
 
 object Sudoku {
