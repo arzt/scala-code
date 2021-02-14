@@ -488,7 +488,21 @@ class SudokuTest extends AnyFreeSpec with Matchers {
         "4231"
     s.transpose(x) mustBe expected
   }
-  it should "filp a sudoku matrix vertically" in {
+  it should "flip a sudoku matrix horizontally" in {
+    val s = new Sudoku(2, 2)
+    val x =
+      "1234" +
+        "3412" +
+        "2143" +
+        "4321"
+    val expected =
+      "4321" +
+        "2143" +
+        "3412" +
+        "1234"
+    s.flipHorizonal(x) mustBe expected
+  }
+  it should "flip a sudoku matrix vertically" in {
     val s = new Sudoku(2, 2)
     val x =
       "1234" +

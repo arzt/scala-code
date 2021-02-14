@@ -9,7 +9,7 @@ class Sudoku(w: Int, h: Int) {
 
   def randomTemplate(): String = {
     val output = Array.fill(cellCount)('_')
-    for (j <- 0 until (math.min(w, h))) {
+    for (j <- 0 until math.min(w, h)) {
       val rn = randomNumbers()
       val boxOffset = toIndex(w*j, h*j)
       for (i <- 0 until 9) {
@@ -216,10 +216,19 @@ class Sudoku(w: Int, h: Int) {
     }).mkString
   }
 
-  def flipVertical(x: String): String = {
+  def flipHorizonal(x: String): String = {
     (for (i <- 0 until cellCount) yield {
       val col = toCol(i)
       val row = valueCount - toRow(i) - 1
+      val o = toIndex(col, row)
+      x.charAt(o)
+    }).mkString
+  }
+
+  def flipVertical(x: String): String = {
+    (for (i <- 0 until cellCount) yield {
+      val col = valueCount - toCol(i) - 1
+      val row = toRow(i)
       val o = toIndex(col, row)
       x.charAt(o)
     }).mkString
