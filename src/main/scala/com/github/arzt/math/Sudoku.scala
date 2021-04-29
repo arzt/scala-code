@@ -7,12 +7,37 @@ import scala.util.Random
 
 class Sudoku(w: Int, h: Int) {
 
+  def getMinimalSudokusRec(i: Int, filled: String, acc: LazyList[String]): LazyList[String] =
+    if (i > cellCount) {
+      if (isUnique(filled)) {
+        acc
+      } else {
+        acc
+      }
+    }
+    else {
+      val a =
+        if (isUnique(filled.updated(i, '_'))) {
+          filled #:: acc
+        } else {
+          getMinimalSudokusRec(i + 1, filled.updated(i, '_'), acc)
+        }
+      val b = getMinimalSudokusRec(i + 1, filled, acc)
+      b
+    }
+
+
+  def getMinimalSudokus(sudoku: String): LazyList[String] = {
+    getMinimalSudokusRec(0, sudoku, LazyList.empty)
+  }
+
+
   def randomTemplate(): String = {
     val output = Array.fill(cellCount)('_')
     for (j <- 0 until math.min(w, h)) {
       val rn = randomNumbers()
       val boxOffset = toIndex(w*j, h*j)
-      for (i <- 0 until 9) {
+      for (i <- 0 until valueCount) {
         val ii = inverseBoxIndex(i)
         output(boxOffset + ii) = rn(i)
       }
@@ -22,8 +47,8 @@ class Sudoku(w: Int, h: Int) {
 
   def randomFilledSudoku(n: Int = 1): String = {
     val str = randomTemplate()
-
-    solveList(str)(Random.nextInt(n))
+    val solved = solveList(str)
+    solved(Random.nextInt(n))
   }
 
   val biggest = (valueCount + '0').toChar
@@ -201,11 +226,7 @@ class Sudoku(w: Int, h: Int) {
 
   def toString(x: String) = x.toIterable.sliding(valueCount*h, valueCount*h).map(rowsToString).mkString("", "\n", "\n")
 
-  def randomNumbers(): String = {
-    ('1' to biggest).mkString("")
-    val a = Random.shuffle(('1' to biggest).toVector).mkString
-    a
-  }
+  def randomNumbers(): String = Random.shuffle(('1' to biggest).toVector).mkString
 
   def transpose(x: String): String = {
     (for (i <- 0 until cellCount) yield {
@@ -233,6 +254,8 @@ class Sudoku(w: Int, h: Int) {
       x.charAt(o)
     }).mkString
   }
+
+  def isUnique(s: String): Boolean = solveList(s).tail.isEmpty
 }
 
 object Sudoku {

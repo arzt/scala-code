@@ -467,12 +467,14 @@ class SudokuTest extends AnyFreeSpec with Matchers {
   }
   it should "compute a random template" in {
     val s = new Sudoku(3, 3)
-    val result: String = s.randomTemplate()
-    s.toString(s.randomFilledSudoku())
-    s.toString(s.randomFilledSudoku())
-    s.toString(s.randomFilledSudoku())
-    s.toString(s.randomFilledSudoku())
+    val result = s.randomTemplate()
     result.length mustBe s.cellCount
+  }
+  it should "return random filled sudoku" in {
+    val s = new Sudoku(3, 3)
+    val result = s.randomFilledSudoku(100)
+    s.isValid(result) mustBe true
+    result.length mustBe 9*9
   }
   it should "transpose a sudoku matrix" in {
     val s = new Sudoku(2, 2)
@@ -515,5 +517,19 @@ class SudokuTest extends AnyFreeSpec with Matchers {
         "3412" +
         "1234"
     s.flipVertical(x) mustBe expected
+  }
+  it should "check if sudoku has unique solution" in {
+    val s = new Sudoku(3, 3)
+    val unique = s.randomFilledSudoku().updated(10, '_').updated(77, '_')
+    println(s.toString(unique))
+    val nonUnique = s.randomTemplate()
+    s.isUnique(unique) mustBe true
+    s.isUnique(nonUnique) mustBe false
+  }
+  it should "return all unique patterns" in {
+    val s = new Sudoku(2, 2)
+    val filled = s.randomFilledSudoku()
+    val result: LazyList[String] = s.getMinimalSudokus(filled)
+    result.isEmpty mustBe false
   }
 }
