@@ -1,9 +1,9 @@
 package com.github.arzt.math
 
-import org.scalatest.FreeSpec
-import org.scalatest.Matchers
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class DimTest extends FreeSpec with Matchers {
+class DimTest extends AnyFreeSpec with Matchers {
   "dim" - {
     "should" in {
 

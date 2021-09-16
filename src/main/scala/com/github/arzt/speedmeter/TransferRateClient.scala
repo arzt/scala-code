@@ -4,7 +4,7 @@ import java.net.Socket
 import scala.util.Random
 
 object TransferRateClient {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val Array(host, port) = args
     val socket = new Socket(host, port.toInt)
     println("Client connected to server...")
