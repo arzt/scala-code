@@ -1,9 +1,10 @@
 package com.github.arzt.math
 
-import org.scalatest.FreeSpec
-import org.scalatest.Matchers
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class SudokuTest extends FreeSpec with Matchers {
+
+class SudokuTest extends AnyFreeSpec with Matchers {
 
   "A valid sudoku" - {
     "should be valid" in {
