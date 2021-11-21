@@ -1,11 +1,11 @@
 package com.github.arzt.audio
 
-import org.scalatest.FreeSpec
-import org.scalatest.Matchers
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.Random
 
-class AudioTest extends FreeSpec with Matchers {
+class AudioTest extends AnyFreeSpec with Matchers {
 
   import Audio.bytesToShorts
   import Audio.shortsToBytes

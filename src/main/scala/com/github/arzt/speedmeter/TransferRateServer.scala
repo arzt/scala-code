@@ -5,10 +5,10 @@ import java.net.ServerSocket
 import scala.annotation.migration
 
 object TransferRateServer {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val Array(portStr) = args
     val port = portStr.toInt
-    val server = new ServerSocket(port);
+    val server = new ServerSocket(port)
     println(s"Server started on port '$port'")
     val socket = server.accept()
     println("Server successfully connected to client...")
@@ -28,9 +28,9 @@ object TransferRateServer {
     println("Server stopped")
   }
 
-  def toBytesPerMs(in: Iterator[(Int, Long)]) =
+  def toBytesPerMs(in: Iterator[(Int, Long)]): Iterator[Double] =
     in.scanLeft(0, 0L) {
-        case ((sumBytes, _), (bytes, time)) if (time % 1000 < time) =>
+        case ((sumBytes, _), (bytes, time)) if time % 1000 < time =>
           (bytes, time % 1000)
         case ((sumBytes, _), (bytes, time)) =>
           (sumBytes + bytes, time % 1000)

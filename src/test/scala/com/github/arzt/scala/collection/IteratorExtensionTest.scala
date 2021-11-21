@@ -1,9 +1,10 @@
 package com.github.arzt.scala.collection
 
-import org.scalatest.FreeSpec
-import org.scalatest.Matchers
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class IteratorExtensionTest extends FreeSpec with Matchers {
+
+class IteratorExtensionTest extends AnyFreeSpec with Matchers {
   "An iterator with no dublicater" - {
     "should have no duplicates" in {
 
