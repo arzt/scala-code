@@ -6,7 +6,7 @@ import java.awt.event.{MouseEvent, MouseListener, MouseMotionListener}
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
 import java.awt.{Canvas, Color, Dimension, Graphics, Graphics2D, RenderingHints}
-import javax.swing.{JFrame, WindowConstants}
+import javax.swing.{JComponent, JFrame, WindowConstants}
 import scala.util.Random
 
 object Test:
@@ -77,18 +77,18 @@ object Test:
 
   def main(args: Array[String]): Unit =
     val cubeSize = 30
-    var state = SudokuiState.random(cubeSize)
+    var state = SudokuiState(cubeSize)
     val f = new JFrame()
     f.setSize(cubeSize*30, cubeSize*30)
     f.setTitle("Title!")
-    val canvas = new Canvas() :
-      override def paint(g: Graphics): Unit =
+    val canvas = new JComponent():
+      override def paintComponent(g: Graphics): Unit =
         val imgWidth = this.getWidth
         val imgHeight = this.getHeight
         val buffer = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_RGB)
         val elements = draw(state)
         drawSwing(elements, buffer.getGraphics.asInstanceOf[Graphics2D])
-        g.drawImage(buffer, 0, 0, imgWidth, imgHeight, null)
+        g.drawImage(buffer, 0, 0, this)
 
 
     canvas.addMouseMotionListener(
