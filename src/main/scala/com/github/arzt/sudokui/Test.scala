@@ -11,12 +11,6 @@ import scala.util.Random
 
 object Test:
 
-  def getK(index: Int): Int = index % 9
-
-  def getJ(index: Int): Int = (index / 9) % 9
-
-  def getI(index: Int): Int = (index / 9 / 9) % 9
-
   def transition(state: SudokuiState, action: Action): SudokuiState =
     action match
       case MouseMotionAction(x, y) =>
@@ -47,10 +41,13 @@ object Test:
 
 
   def draw(state: SudokuiState): IndexedSeq[Drawable] =
+
+    val SudokuiState(sudoku, hover, cubeSize) = state
+
     for (ind <- 0 until 9 * 9 * 9) yield
-      val i = getI(ind)
-      val j = getJ(ind)
-      val k = getK(ind)
+      val i = sudoku.getI(ind)
+      val j = sudoku.getJ(ind)
+      val k = sudoku.getK(ind)
       val isSet = state.sudoku.cells(ind)
       val yOffset = k / 3
       val xOffset = k % 3

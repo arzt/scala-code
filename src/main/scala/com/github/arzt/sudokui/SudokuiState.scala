@@ -6,6 +6,12 @@ case class Sudoku(cells: Seq[Boolean]):
   def flipCell(i: Int): Sudoku =
     this.copy(cells = cells.updated(i, !cells(i)))
 
+  def getK(index: Int): Int = index % 9
+
+  def getJ(index: Int): Int = (index / 9) % 9
+
+  def getI(index: Int): Int = (index / 9 / 9) % 9
+
 case class SudokuiState(sudoku: Sudoku, hover: Option[Int] = None, cubeSize: Int)
 
 object SudokuiState:
