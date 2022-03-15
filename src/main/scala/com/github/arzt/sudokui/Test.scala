@@ -39,10 +39,10 @@ object Test:
         val innerCol = col % 3
         val c = innerCol + innerRow * 3
         println((a, b, c))
-        val idxNew = ((a * 9) + b)* 9 + c
-        state.copy(state = state.state.updated(idxNew, !state.state.apply(idxNew)))
+        val idx = ((a * 9) + b)* 9 + c
+        state.copy(sudoku = state.sudoku.flipCell(idx))
       case unhandled =>
-        println(f"unhandled: ${unhandled}")
+        println(f"unhandled: $unhandled")
         state
 
 
@@ -51,7 +51,7 @@ object Test:
       val i = getI(ind)
       val j = getJ(ind)
       val k = getK(ind)
-      val isSet = state.state(ind)
+      val isSet = state.sudoku.cells(ind)
       val yOffset = k / 3
       val xOffset = k % 3
       val x = (j * 3 + xOffset) * state.cubeSize
