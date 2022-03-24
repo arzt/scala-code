@@ -31,14 +31,14 @@ object Test:
 
     for (ind <- 0 until 9 * 9 * 9) yield
       val isSet = sudoku(ind)
-      val x = sudoku.getX(ind)
-      val y = sudoku.getY(ind)
+      val x = state.getX(ind)
+      val y = state.getY(ind)
       if (hover.contains(ind))
-        Rectangle(x * cellSize, y * cellSize, cellSize, cellSize, Color.BLUE)
+        Rectangle(x, y, cellSize, cellSize, Color.BLUE)
       else if (isSet)
-        Rectangle(x * cellSize, y * cellSize, cellSize, cellSize, Color.GREEN)
+        Rectangle(x, y, cellSize, cellSize, Color.GREEN)
       else
-        Rectangle(x * cellSize, y * cellSize, cellSize, cellSize, Color.RED)
+        Rectangle(x, y, cellSize, cellSize, Color.RED)
 
 
   def drawSwing(elements: Seq[Drawable], graphics2D: Graphics2D): Unit =
@@ -76,7 +76,7 @@ object Test:
           val nextState = transition(state, action)
           if (nextState != state)
             canvas.repaint(5L)
-            state = nextState
+          state = nextState
     )
 
     canvas.addMouseListener(
