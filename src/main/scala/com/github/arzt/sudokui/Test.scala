@@ -27,21 +27,21 @@ object Test:
 
   def draw(state: SudokuInterface): IndexedSeq[Drawable] =
 
-    val SudokuInterface(sudoku, cubeSize, hover) = state
+    val SudokuInterface(sudoku, cellSize, hover) = state
 
     for (ind <- 0 until 9 * 9 * 9) yield
       val i = sudoku.getI(ind)
       val j = sudoku.getJ(ind)
       val k = sudoku.getK(ind)
-      val isSet = state.sudoku(ind)
+      val isSet = sudoku(ind)
       val x = sudoku.getX(ind)
       val y = sudoku.getY(ind)
-      if (state.hover.contains(ind))
-        Rectangle(x * state.cellSize, y * state.cellSize, state.cellSize, state.cellSize, Color.BLUE)
+      if (hover.contains(ind))
+        Rectangle(x * cellSize, y * cellSize, cellSize, cellSize, Color.BLUE)
       else if (isSet)
-        Rectangle(x * state.cellSize, y * state.cellSize, state.cellSize, state.cellSize, Color.GREEN)
+        Rectangle(x * cellSize, y * cellSize, cellSize, cellSize, Color.GREEN)
       else
-        Rectangle(x * state.cellSize, y * state.cellSize, state.cellSize, state.cellSize, Color.RED)
+        Rectangle(x * cellSize, y * cellSize, cellSize, cellSize, Color.RED)
 
 
   def drawSwing(elements: Seq[Drawable], graphics2D: Graphics2D): Unit =
@@ -84,12 +84,7 @@ object Test:
 
     canvas.addMouseListener(
       new MouseListener:
-        override def mouseClicked(e: MouseEvent): Unit =
-          val action = MouseClicked(e.getX, e.getY)
-          val nextState = transition(state, action)
-          if (nextState != state)
-            state = nextState
-            canvas.repaint(5L)
+        override def mouseClicked(e: MouseEvent): Unit = {}
 
         override def mouseEntered(e: MouseEvent): Unit = {}
 
@@ -97,7 +92,12 @@ object Test:
 
         override def mouseReleased(e: MouseEvent): Unit = {}
 
-        override def mousePressed(e: MouseEvent): Unit = {}
+        override def mousePressed(e: MouseEvent): Unit =
+          val action = MouseClicked(e.getX, e.getY)
+          val nextState = transition(state, action)
+          if (nextState != state)
+            state = nextState
+            canvas.repaint(5L)
     )
 
     f.add(canvas)
