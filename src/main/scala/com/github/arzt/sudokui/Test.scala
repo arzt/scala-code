@@ -30,9 +30,6 @@ object Test:
     val SudokuInterface(sudoku, cellSize, hover) = state
 
     for (ind <- 0 until 9 * 9 * 9) yield
-      val i = sudoku.getI(ind)
-      val j = sudoku.getJ(ind)
-      val k = sudoku.getK(ind)
       val isSet = sudoku(ind)
       val x = sudoku.getX(ind)
       val y = sudoku.getY(ind)
