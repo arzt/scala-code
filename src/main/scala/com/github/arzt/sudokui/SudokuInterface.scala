@@ -48,7 +48,7 @@ case class SudokuInterface(sudoku: Sudoku, cellSize: Int, hover: Option[Int] = N
     val innerRow = row % 3
     val innerCol = col % 3
     val c = innerCol + innerRow * 3
-    val index = ((a * 9) + b) * 9 + c
+    val index = (a * 9 + b) * 9 + c
     index
 
   def getX(index: Int): Int =
