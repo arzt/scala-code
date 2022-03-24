@@ -37,20 +37,19 @@ object Sudoku:
 
 case class SudokuInterface(sudoku: Sudoku, cellSize: Int, hover: Option[Int] = None):
   def getIndex(x: Int, y: Int): Int =
-    val boxX = x/((cellSize*3 + 1)*3 + 1)
-    val boxY = y/((cellSize*3 + 1)*3 + 1)
-    val cellX = (x - boxX - 1)/(cellSize + 1)/3
-    val cellY = (y - boxY - 1)/(cellSize + 1)/3
-    val col = (x - boxX - 1 - cellX)/ cellSize
-    val row = (y - boxY - 1 - cellY)/ cellSize
-    println(f"boxX $boxX cellX $cellX subCellX $col")
+    val boxX = x / ((cellSize * 3 + 1) * 3 + 1)
+    val boxY = y / ((cellSize * 3 + 1) * 3 + 1)
+    val cellX = (x - boxX - 1) / (cellSize + 1) / 3
+    val cellY = (y - boxY - 1) / (cellSize + 1) / 3
+    val col = (x - boxX - 1 - cellX) / cellSize
+    val row = (y - boxY - 1 - cellY) / cellSize
     val a = row / 3
     val b = col / 3
     val innerRow = row % 3
     val innerCol = col % 3
     val c = innerCol + innerRow * 3
-    val idxNew = ((a * 9) + b)* 9 + c
-    idxNew
+    val index = ((a * 9) + b) * 9 + c
+    index
 
   def getX(index: Int): Int =
     val i = sudoku.getI(index)
