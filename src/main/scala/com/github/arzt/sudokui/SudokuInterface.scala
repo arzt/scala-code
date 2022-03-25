@@ -35,16 +35,19 @@ object Sudoku:
 
   def random(): Sudoku = Sudoku(Vector.fill(9*9*9)(Random.nextBoolean()))
 
-case class SudokuInterface(sudoku: Sudoku, cellSize: Int, hover: Option[Int] = None):
+case class SudokuInterface(sudoku: Sudoku, subCellSize: Int, hover: Option[Int] = None):
   def getIndex(x: Int, y: Int): Int =
-    val boxX = x / ((cellSize * 3 + 1) * 3 + 1)
-    val boxY = y / ((cellSize * 3 + 1) * 3 + 1)
-    val cellX = (x - boxX - 1) / (cellSize + 1) / 3
-    val cellY = (y - boxY - 1) / (cellSize + 1) / 3
-    val col = (x - boxX - 1 - cellX) / cellSize
-    val row = (y - boxY - 1 - cellY) / cellSize
+    val cellSize = subCellSize * 3 + 1
+    val boxSize = cellSize * 3 + 1
+    val boxX = x / boxSize
+    val boxY = y / boxSize
+    val cellX = (x - boxX - 1) / (subCellSize + 1) / 3
+    val cellY = (y - boxY - 1) / (subCellSize + 1) / 3
+    val col = (x - boxX - 1 - cellX) / subCellSize
+    val row = (y - boxY - 1 - cellY) / subCellSize
     val a = row / 3
     val b = col / 3
+    println(f"boxX $boxX boxY $boxY cellX $cellX cellY $cellY col $col row $row")
     val innerRow = row % 3
     val innerCol = col % 3
     val c = innerCol + innerRow * 3
@@ -58,7 +61,7 @@ case class SudokuInterface(sudoku: Sudoku, cellSize: Int, hover: Option[Int] = N
     val addBox = j/3
     val xOffset = k % 3
     val x = j * 3 + xOffset
-    x * cellSize + addBox + j
+    x * subCellSize + addBox + j
 
   def getY(index: Int): Int =
     val i = sudoku.getI(index)
@@ -67,5 +70,5 @@ case class SudokuInterface(sudoku: Sudoku, cellSize: Int, hover: Option[Int] = N
     val add = i/3
     val yOffset = k / 3
     val y = i * 3 + yOffset
-    y * cellSize + add + i
+    y * subCellSize + add + i
 
