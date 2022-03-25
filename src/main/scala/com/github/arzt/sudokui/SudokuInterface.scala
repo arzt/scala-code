@@ -36,7 +36,7 @@ object Sudoku:
   def random(): Sudoku = Sudoku(Vector.fill(9*9*9)(Random.nextBoolean()))
 
 case class SudokuInterface(sudoku: Sudoku, subCellSize: Int, hover: Option[Int] = None):
-  def getIndex(x: Int, y: Int): Int =
+  def getIndex(x: Int, y: Int): Option[Int] =
     val cellSize = subCellSize * 3 + 1
     val boxSize = cellSize * 3 + 1
     val boxX = x / boxSize
@@ -45,14 +45,18 @@ case class SudokuInterface(sudoku: Sudoku, subCellSize: Int, hover: Option[Int] 
     val cellY = (y - boxY - 1) / (subCellSize + 1) / 3
     val col = (x - boxX - 1 - cellX) / subCellSize
     val row = (y - boxY - 1 - cellY) / subCellSize
-    val a = row / 3
-    val b = col / 3
-    println(f"boxX $boxX boxY $boxY cellX $cellX cellY $cellY col $col row $row")
-    val innerRow = row % 3
-    val innerCol = col % 3
-    val c = innerCol + innerRow * 3
-    val index = (a * 9 + b) * 9 + c
-    index
+    val isWithin = col >= 0 && col < 27 && row >= 0 && row < 27
+    val result = Option.when(isWithin) {
+      println(f"boxX $boxX boxY $boxY cellX $cellX cellY $cellY col $col row $row")
+      val i = row / 3
+      val j = col / 3
+      val innerRow = row % 3
+      val innerCol = col % 3
+      val k = innerCol + innerRow * 3
+      val index = (i * 9 + j) * 9 + k
+      index
+    }
+    result
 
   def getX(index: Int): Int =
     val i = sudoku.getI(index)

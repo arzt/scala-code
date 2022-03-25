@@ -16,10 +16,12 @@ object Test:
     action match
       case MouseMotionAction(x, y) =>
         val idx = state.getIndex(x, y)
-        SudokuInterface(sudoku, cubeSize, Some(idx))
+        SudokuInterface(sudoku, cubeSize, idx)
       case MouseClicked(x, y) =>
         val idx = state.getIndex(x, y)
-        SudokuInterface(sudoku.flipCell(idx), cubeSize, hover)
+        idx match
+          case Some(i) => SudokuInterface(sudoku.flipCell(i), cubeSize, hover)
+          case None => state
       case unhandled =>
         println(f"unhandled: $unhandled")
         state
