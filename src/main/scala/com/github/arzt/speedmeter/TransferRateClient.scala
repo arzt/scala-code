@@ -13,6 +13,7 @@ object TransferRateClient {
     val a = Iterator
       .continually {
         Random.nextBytes(buf)
+        println("printting!")
         os.write(buf)
         (buf.length, System.currentTimeMillis())
       }

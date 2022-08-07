@@ -1,11 +1,13 @@
 package com.github.arzt.sudokui
 
-import com.github.arzt.fungraph.{Action, Drawable, MouseClicked, MouseMotionAction, Rectangle}
+import com.github.arzt.fungraph
+import com.github.arzt.fungraph.{Action, Drawable, Glyph, MouseClicked, MouseMotionAction, Rectangle, Resize}
 
-import java.awt.event.{MouseEvent, MouseListener, MouseMotionListener}
+import java.awt.event.{ComponentEvent, ComponentListener, MouseEvent, MouseListener, MouseMotionListener, WindowEvent, WindowListener, WindowStateListener}
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
-import java.awt.{Canvas, Color, Dimension, Graphics, Graphics2D, RenderingHints}
+import java.awt.{Canvas, Color, Dimension, Font, Graphics, Graphics2D, RenderingHints}
+import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import javax.swing.{JComponent, JFrame, WindowConstants}
 import scala.util.Random
 
@@ -22,41 +24,65 @@ object Test:
         idx match
           case Some(i) => SudokuInterface(sudoku.flipCell(i), cubeSize, hover)
           case None => state
+      case Resize(width, height) =>
+        state.copy(subCellSize = math.min(width, height)/28)
       case unhandled =>
         println(f"unhandled: $unhandled")
         state
 
 
-  def draw(state: SudokuInterface): IndexedSeq[Drawable] =
+  def draw(state: SudokuInterface): Iterable[Drawable] =
 
     val SudokuInterface(sudoku, cellSize, hover) = state
 
-    for (ind <- 0 until 9 * 9 * 9) yield
+    val subCells = for (ind <- 0 until 9 * 9 * 9) yield
       val isSet = sudoku(ind)
       val x = state.getX(ind)
       val y = state.getY(ind)
       if (hover.contains(ind))
-        Rectangle(x, y, cellSize, cellSize, Color.BLUE)
+        Rectangle(x, y, cellSize, cellSize, Color.GREEN.brighter())
       else if (isSet)
-        Rectangle(x, y, cellSize, cellSize, Color.GREEN)
+        Rectangle(x, y, cellSize, cellSize, Color.WHITE)
       else
-        Rectangle(x, y, cellSize, cellSize, Color.RED)
+        Rectangle(x, y, cellSize, cellSize, Color.WHITE)
+
+    val fontSize = state.subCellSize.*(0.75).toInt
+    val glyphs = (0 until 9 * 9 * 9)
+      .filter(sudoku.apply)
+      .map(
+        ind => {
+          val k = state.sudoku.getK(ind)
+          val x = state.getX(ind)
+          val y = state.getY(ind)
+          Glyph(x + cellSize/4, y + cellSize/1.5, (k + 1).toString, new Font(Font.MONOSPACED, Font.BOLD, fontSize), color = Color.darkGray)
+        }
+      )
+
+    subCells ++ glyphs
 
 
-  def drawSwing(elements: Seq[Drawable], graphics2D: Graphics2D): Unit =
-    val oldColor = graphics2D.getColor
+  def drawSwing(elements: Iterable[Drawable], g: Graphics2D): Unit =
+    g.asInstanceOf[Graphics2D].setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    val oldColor = g.getColor
     for (elem <- elements)
       elem match
         case Rectangle(x, y, width, height, color) =>
-          graphics2D.setColor(color)
-          graphics2D.fill(new Rectangle2D.Double(x, y, width, height))
-    graphics2D.setColor(oldColor)
+          g.setColor(color)
+          g.fill(new Rectangle2D.Double(x, y, width, height))
+        case Glyph(x, y, text, font, color) =>
+          g.setColor(color)
+          g.setFont(font)
+          g.drawString(text, x.toFloat, y.toFloat)
+    g.setColor(oldColor)
 
   def main(args: Array[String]): Unit =
-    val cubeSize = 20
-    var state = SudokuInterface(Sudoku(), cubeSize)
+    val subCellSize = 40
+    var state = SudokuInterface(Sudoku(), subCellSize)
+    val windowWidth = 1000
+    val windowHeight = 808
+    state = transition(state, Resize(windowWidth, windowHeight))
     val f = new JFrame()
-    f.setSize(cubeSize*30, cubeSize*30)
+    f.setSize(windowWidth, windowHeight)
     f.setTitle("Title!")
     val canvas = new JComponent():
       override def paintComponent(g: Graphics): Unit =
@@ -98,6 +124,17 @@ object Test:
             state = nextState
             canvas.repaint(5L)
     )
+
+    canvas.addComponentListener(new ComponentListener {
+      override def componentResized(e: ComponentEvent): Unit =
+        state = transition(state, Resize(e.getComponent.getWidth, e.getComponent.getHeight))
+
+      override def componentMoved(e: ComponentEvent): Unit = ???
+
+      override def componentShown(e: ComponentEvent): Unit = ???
+
+      override def componentHidden(e: ComponentEvent): Unit = ???
+    })
 
     f.add(canvas)
     f.setVisible(true)
