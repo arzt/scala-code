@@ -13,12 +13,7 @@ import javax.sound.sampled.AudioSystem
 object Audio {
 
   def main(args: Array[String]): Unit = {
-    val path = {
-      "/home/sebastian/Desktop/audio/octave.wav"
-      "/home/sebastian/Desktop/audio/saw.wav"
-      "/home/sebastian/Desktop/audio/Muse - 01 - Sunburn-mono.wav"
-      "/home/sebastian/Desktop/audio/Muse - 01 - Sunburn-stereo.wav"
-    }
+    val path = "/home/sebastian/Desktop/audio/Muse - 01 - Sunburn-stereo.wav"
 
     val in = AudioSystem.getAudioInputStream(new File(path))
     val origBytes = streamToBytes()(in).toArray
