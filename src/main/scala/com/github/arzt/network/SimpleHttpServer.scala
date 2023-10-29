@@ -8,6 +8,8 @@ import javax.imageio.ImageIO
 
 object SimpleHttpServer:
 
+  val file = "/media/frog/musik/Digitalism - 2008 - Idealism/Digitalism - 07 - Pogo.flac"
+
   val root: HttpHandler =
     exchange =>
       println(exchange)
@@ -36,7 +38,7 @@ object SimpleHttpServer:
   val flac: HttpHandler =
     exchange =>
       println("flac")
-      val fis = new FileInputStream("/home/sebastian/Downloads/other/music/The Cure - Assemblage - 1991 (12CD FLAC)/The Cure - Assemblage - 1991 (12CD FLAC)/02 - Boys Don't Cry (1980)/01 - Boys Don't Cry.flac")
+      val fis = new FileInputStream(file)
       val bytes = fis.readAllBytes()
       val stream = exchange.getResponseBody
       val length = bytes.length
@@ -50,16 +52,18 @@ object SimpleHttpServer:
   val flac2: HttpHandler =
     exchange =>
       println("flac2")
-      val fis = new FileInputStream("/home/sebastian/Downloads/other/music/The Cure - Assemblage - 1991 (12CD FLAC)/The Cure - Assemblage - 1991 (12CD FLAC)/02 - Boys Don't Cry (1980)/01 - Boys Don't Cry.flac")
+      val fis = new FileInputStream(file)
       val length = fis.available()
       val buffer = new Array[Byte](1024*100)
       val stream = exchange.getResponseBody
-      exchange.sendResponseHeaders(200, length)
+      exchange.sendResponseHeaders(200, 0)
       var count = 0
       var read = fis.read(buffer)
       while (read > -1)
         stream.write(buffer, 0, read)
-        read = fis.read(buffer)
+        if count < 2 then
+          read = fis.read(buffer)
+
         Thread.sleep(1000)
         println(f"hui ${count} read: ${read}")
         count += 1
@@ -73,7 +77,7 @@ object SimpleHttpServer:
     import java.util.concurrent.Executors
 
     val executor = Executors.newFixedThreadPool(10)
-    val server = HttpServer.create(new InetSocketAddress("192.168.178.73", 8001), 0)
+    val server = HttpServer.create(new InetSocketAddress("192.168.178.37", 8001), 0)
 
     server.createContext("/", root)
     server.createContext("/img", img)
