@@ -5,6 +5,7 @@ import scala.collection.immutable.ArraySeq
 import MetadataBlockType.*
 
 import scala.annotation.tailrec
+import scala.util.Using
 
 enum MetadataBlockType(code: Int):
   case StreamInfoType extends MetadataBlockType(0)
@@ -38,22 +39,19 @@ case class MetadataBlock(header: MetadataBlockHeader, data: MetadataBlockData)
 
 case class RawFlac(metadataBlocks: LazyList[MetadataBlock], error: Option[String])
 
+type FlacElement = MetadataBlockHeader | StreamInfo | PaddingBlockData | VorbisCommentBlockData
+
 object FlacParser:
 
   private
   def fileToBytes(input: RandomAccessFile): LazyList[Byte] =
-    val buf = new Array[Byte](10240)
-
-    val buf2 = IArray(buf)
+    val buf = new Array[Byte](1000)
+    var counter = 0
     LazyList
-      .continually(
-        {
-          println("evaluated!")
-          input.read(buf)
-        }
-      )
+      .continually(buf)
+      .map(input.read)
       .takeWhile(_ >= 0)
-      .flatMap(buf.view.slice(0, _))
+      .flatMap(buf.view.take)
 
   def parseMetadataBlockHeader(bytes: LazyList[Byte]): (MetadataBlockHeader, LazyList[Byte]) =
       val a #:: b #:: c #:: d #:: tail = bytes : @unchecked
@@ -157,10 +155,12 @@ object FlacParser:
       .map(
         testFile =>
           val mode = "r"
-          val raFile = new RandomAccessFile(testFile, mode)
-          val bytes = fileToBytes(raFile)
-          val flac = parseFlac(bytes)
-          flac
+          Using.resource(new RandomAccessFile(testFile, mode))(
+            raFile =>
+              val bytes = fileToBytes(raFile)
+              val flac = parseFlac(bytes)
+              flac
+          )
       )
     println(result)
 
