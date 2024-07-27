@@ -5,7 +5,7 @@ import com.github.arzt.fungraph.function.waves
 import java.awt.Frame
 import java.awt.event.{WindowAdapter, WindowEvent}
 import java.awt.image.BufferedImage
-import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 
 object HelloWorld:
 
@@ -29,8 +29,8 @@ object HelloWorld:
       i += 1
 
   def main(args: Array[String]): Unit =
-    val width = 200
-    val height = 200
+    val width = 600
+    val height = 400
     val image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val wind = new Frame("Hello")
     wind.setLocation(100, 100)
@@ -39,10 +39,6 @@ object HelloWorld:
     wind.add(canvas)
     wind.setVisible(true)
     val executor = new ScheduledThreadPoolExecutor(2)
-    val runner: Runnable = () => {
-      val t = System.currentTimeMillis() / 1000.0
-      drawFunction(t, waves, image)
-    }
 
     wind.addWindowListener(
       new WindowAdapter:
@@ -54,13 +50,17 @@ object HelloWorld:
 
     var count = 0
     var last = System.currentTimeMillis()
+    val runner: Runnable =
+      () => {
+        val t = System.currentTimeMillis()
+        val fps = 1000.0 / (t - last)
+        last = t
+        drawFunction(t/1000.0, waves, image)
+        canvas.setImage(image)
+        count += 1
+        Thread.sleep(0, 10)
+        println(fps)
+      }
+    // executor.scheduleWithFixedDelay(runner, 0, 0, TimeUnit.MILLISECONDS)
     while true do
-      val t = System.currentTimeMillis()
-      val fps = 1000.0 / (t - last)
-      last = t
       runner.run()
-      canvas.setImage(image)
-      count += 1
-      Thread.sleep(0, 10)
-      println(fps)
-    end while
