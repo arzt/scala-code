@@ -1,38 +1,15 @@
 package com.github.arzt.math
 
-import com.github.arzt.math.Sudoku.Constraint
+import com.github.arzt.math.Sudoku.{Constraint, LazyConstraint}
 
+import scala.annotation.{tailrec, targetName}
 import scala.collection.immutable.WrappedString
 import scala.util.Random
+import Sudoku.&&
 
-class Sudoku(w: Int, h: Int) {
+class Sudoku(w: Int, h: Int):
 
-  def getMinimalSudokusRec(i: Int, filled: String, acc: LazyList[String]): LazyList[String] =
-    if (i > cellCount) {
-      if (isUnique(filled)) {
-        acc
-      } else {
-        acc
-      }
-    }
-    else {
-      val a =
-        if (isUnique(filled.updated(i, '_'))) {
-          filled #:: acc
-        } else {
-          getMinimalSudokusRec(i + 1, filled.updated(i, '_'), acc)
-        }
-      val b = getMinimalSudokusRec(i + 1, filled, acc)
-      b
-    }
-
-
-  def getMinimalSudokus(sudoku: String): LazyList[String] = {
-    getMinimalSudokusRec(0, sudoku, LazyList.empty)
-  }
-
-
-  def randomTemplate(): String = {
+  def randomTemplate(): String =
     val output = Array.fill(cellCount)('_')
     for (j <- 0 until math.min(w, h)) {
       val rn = randomNumbers()
@@ -43,7 +20,6 @@ class Sudoku(w: Int, h: Int) {
       }
     }
     output.mkString
-  }
 
   def randomFilledSudoku(n: Int = 1): String = {
     val str = randomTemplate()
@@ -51,22 +27,21 @@ class Sudoku(w: Int, h: Int) {
     solved(Random.nextInt(n))
   }
 
-  val biggest = (valueCount + '0').toChar
+  val biggest: Char = (valueCount + '0').toChar
 
   def matchesCell(x: String, temp: String): Boolean = {
     (x.length > temp.length) || {
-      val template = temp.charAt(x.length - 1)
+      val template = temp(x.length - 1)
       template > biggest ||
         template < '1' ||
-        template == x.charAt(x.length - 1)
+        template == x.last
     }
   }
 
   def matchesRow(x: String, temp: String): Boolean = {
-    val value = x(x.length - 1)
     var i = x.length
 
-    while (i % valueCount > 0 && i < temp.length && temp.charAt(i) != value)
+    while (i % valueCount > 0 && i < temp.length && temp(i) != x.last)
       i += 1
 
     i == temp.length || i % valueCount == 0
@@ -74,10 +49,10 @@ class Sudoku(w: Int, h: Int) {
 
   def matchesCol(s: String, temp: String): Boolean = {
     var i = s.length - 1
-    val value = s.charAt(i)
+    val value = s(i)
     i += valueCount
 
-    while (i < temp.length && value != temp.charAt(i))
+    while (i < temp.length && value != temp(i))
       i += valueCount
 
     i >= temp.length
@@ -86,18 +61,18 @@ class Sudoku(w: Int, h: Int) {
   def matchesBox(s: String, temp: String): Boolean = {
     temp.length < s.length || {
       val last = s.length - 1
-      val value = s.charAt(last)
+      val value = s(last)
       val offset = boxOffset(last)
       var iBox = boxIndex(last)
       iBox += 1
       val i1 = inverseBoxIndex(iBox)
       var i = offset + i1
-      while (iBox < valueCount && i < temp.length && temp.charAt(i) != value) {
+      while (iBox < valueCount && i < temp.length && temp(i) != value) {
         iBox += 1
         val i2 = inverseBoxIndex(iBox)
         i = offset + i2
       }
-      iBox == valueCount || i == temp.length || (i <= temp.length && temp.charAt(i) != value)
+      iBox == valueCount || i == temp.length || (i <= temp.length && temp(i) != value)
     }
   }
 
@@ -108,6 +83,8 @@ class Sudoku(w: Int, h: Int) {
       matchesBox(x, temp)
 
   def valueCount: Int = w * h
+
+  def maxValue: Char = ('0' + valueCount).toChar
 
   def cellCount: Int = valueCount * valueCount
 
@@ -123,17 +100,36 @@ class Sudoku(w: Int, h: Int) {
       x + "1"
     } else {
       var j = x.length - 1
-      while (j > 0 && x.charAt(j) == biggest) {
+      while (j > 0 && x(j) == biggest) {
         j -= 1
       }
-      val charJ = x.charAt(j)
+      val charJ = x(j)
       if (j > -1 && charJ < biggest) {
         val ca = (charJ + 1).toChar
-        x.substring(0, j) + ca
+        val r1 = x.substring(0, j) + ca
+        r1
       } else {
         ""
       }
     }
+  }
+
+  def nextCandidate2(c: LazyConstraint)(x: String): String = nextCandidate2(c, x, '1')
+
+  @tailrec
+  final def nextCandidate2(c: LazyConstraint, x: String, test: Char): String = {
+    if (test <= maxValue)
+      if (c(x)(test))
+        val result = x + test
+        result
+      else
+        nextCandidate2(c, x, (test + 1).toChar)
+    else
+      if (test >= maxValue)
+        val last = x.last
+        nextCandidate2(c, x.take(x.length - 1), (last + 1).toChar)
+      else
+        nextCandidate2(c, x, (test + 1).toChar)
   }
 
   def nextCandidateCurr(c: Constraint): String => String =
@@ -166,48 +162,57 @@ class Sudoku(w: Int, h: Int) {
     result
   }
 
-  def hasValidRow(x: String): Boolean = {
-    val last = x.length - 1
-    val col = toCol(last)
-    val end = last
-    val start = end - col
-    var i = start
-    while (i < end && x.charAt(i) != x.charAt(last)) {
-      i = i + 1
-    }
-    i == end
+  val hasValidRow2: LazyConstraint = x => h => {
+    val end = x.length
+    val start = end - toCol(end)
+    !x.view.slice(start, end).contains(h)
   }
 
-  def hasValidCol(x: String): Boolean = {
-    val last = x.length - 1
-    var i = last - valueCount
-    while (i > -1 && x.charAt(i) != x.charAt(last)) {
-      i -= valueCount
-    }
-    val valid = i < 0
-    valid
+  val hasValidCol2: LazyConstraint = x => h => {
+    val end = x.length
+    val start = toCol(end)
+    !Range(start, end, valueCount).view.map(x.apply).contains(h)
   }
 
-  def hasValidBox(x: String): Boolean = {
-    val offset = boxOffset(x.length - 1)
+  val hasValidBox2: LazyConstraint = x => h => {
+    val offset = boxOffset(x.length)
     var j = 0
-    val lastChar = x.charAt(x.length - 1)
-    while (j < box.length && x.charAt(box(j) + offset) != lastChar) {
+    while (j < box.length && box(j) + offset < x.length && x(box(j) + offset) != h) {
       j += 1
     }
     val k = box(j) + offset
-    val contains = k < x.length - 1 && x.charAt(k) == lastChar
-    !contains
+    k == x.length
   }
+
+  def hasValidRow(x: String): Boolean = hasValidRow2(x.take(x.length - 1))(x.last)
+
+  def hasValidCol(x: String): Boolean = hasValidCol2(x.take(x.length - 1))(x.last)
+
+  def hasValidBox(x: String): Boolean = hasValidBox2(x.take(x.length - 1))(x.last)
 
   def isValid(x: String): Boolean = hasValidRow(x) && hasValidCol(x) && hasValidBox(x)
 
+  def isValidLazy: LazyConstraint = hasValidBox2 && hasValidCol2 && hasValidRow2
+
   def isValidTemplate(template: String)(x: String): Boolean = isValid(x) && matchesTemplate(x, template)
+
+  def allSudocus(start: String): LazyList[String] = LazyList.iterate(start)(nextCandidate2(isValidLazy))
+
+  def allSudokus: LazyList[String] = LazyList.iterate("1")(nextCandidate2(isValidLazy))
 
   def iterateCandidates(sudoku: String): Iterator[String] = {
     val start = "1"
+    var i = 0
     Iterator
-      .iterate(start)(nextCandidateCurr(isValidTemplate(sudoku)(_)))
+      .iterate(start)(nextCandidateCurr(isValidTemplate(sudoku)))
+      .map(
+        x => {
+          i += 1
+          //if (i % 10000 == 0)
+            //println(f"Steps: ${i}")
+          x
+        }
+      )
       .takeWhile(_.nonEmpty)
   }
 
@@ -233,7 +238,7 @@ class Sudoku(w: Int, h: Int) {
       val col = toCol(i)
       val row = toRow(i)
       val o = toIndex(row, col)
-      x.charAt(o)
+      x(o)
     }).mkString
   }
 
@@ -242,7 +247,7 @@ class Sudoku(w: Int, h: Int) {
       val col = toCol(i)
       val row = valueCount - toRow(i) - 1
       val o = toIndex(col, row)
-      x.charAt(o)
+      x(o)
     }).mkString
   }
 
@@ -251,16 +256,19 @@ class Sudoku(w: Int, h: Int) {
       val col = valueCount - toCol(i) - 1
       val row = toRow(i)
       val o = toIndex(col, row)
-      x.charAt(o)
+      x(o)
     }).mkString
   }
 
   def isUnique(s: String): Boolean = solveList(s).tail.isEmpty
-}
 
-object Sudoku {
+end Sudoku
+
+object Sudoku:
 
   type Constraint = String => Boolean
+
+  type LazyConstraint = String => Char => Boolean
 
   implicit class StringOpsSudoku(v: String) {
     def toInts: Array[Int] = v.map(_ - '0').toArray
@@ -270,4 +278,10 @@ object Sudoku {
     def &&(b: Constraint): Constraint = x => a(x) && b(x)
   }
 
-}
+  extension (a: LazyConstraint)
+    def &&(b: LazyConstraint): LazyConstraint = s => c => a(s)(c) && b(s)(c)
+
+  def concat(x: String*): String = x.reduce(_ + _)
+
+end Sudoku
+
